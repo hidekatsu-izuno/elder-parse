@@ -138,7 +138,7 @@ class CstNodeAdapter
 	}
 }
 
-export declare type CompiledQuery = ReturnType<
+declare type CompiledQuery = ReturnType<
 	typeof compile<CstNode, CstNode>
 >;
 const SELECTOR_CACHE = new CacheMap<string, CompiledQuery>(256);
