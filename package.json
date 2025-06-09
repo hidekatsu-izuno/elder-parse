@@ -1,0 +1,56 @@
+{
+	"name": "elder-parse",
+	"version": "0.1.0",
+	"description": "Lexer and parser library of a hand-written style.",
+	"type": "module",
+	"main": "./cjs/index.js",
+	"module": "./mjs/index.js",
+	"types": "./mjs/index.d.ts",
+	"scripts": {
+		"build": "tsc --build --clean && tsc -p ./tsconfig.mjs.json && tsc -p ./tsconfig.cjs.json",
+		"test": "node --disable-warning=ExperimentalWarning --experimental-strip-types --test",
+		"format": "biome check --write",
+		"version:major": "npm run build && commit-and-tag-version --release-as major",
+		"version:major:alpha": "npm run build && commit-and-tag-version --release-as major --prerelease alpha",
+		"version:minor": "npm run build && commit-and-tag-version --release-as minor",
+		"version:minor:alpha": "npm run build && commit-and-tag-version --release-as minor --prerelease alpha",
+		"version:patch": "npm run build && commit-and-tag-version --release-as patch",
+		"release": "git push --follow-tags origin main && npm publish",
+		"release:alpha": "git push --follow-tags origin main && npm publish --tag alpha"
+	},
+	"files": ["cjs/", "mjs/", "src/", "LICENSE", "package.json", "README.md"],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/hidekatsu-izuno/elder-parse.git"
+	},
+	"author": "Hidekatsu Izuno <hidekatsu.izuno@gmail.com> (https://github.com/hidekatsu-izuno/)",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/hidekatsu-izuno/elder-parse/issues"
+	},
+	"homepage": "https://github.com/hidekatsu-izuno/elder-parse#readme",
+	"keywords": ["lexer", "parser"],
+	"exports": {
+		".": {
+			"import": {
+				"types": "./mjs/index.d.ts",
+				"default": "./mjs/index.js"
+			},
+			"require": {
+				"types": "./cjs/index.d.ts",
+				"default": "./cjs/index.js"
+			},
+			"default": "./cjs/index.js"
+		},
+		"./package.json": "./package.json"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@types/node": "^22.15.29",
+		"commit-and-tag-version": "^12.5.1",
+		"typescript": "^5.8.3"
+	},
+	"dependencies": {
+		"css-select": "^5.1.0"
+	}
+}

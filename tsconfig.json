@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"newLine": "LF",
+		"target": "ES2024",
+		"strict": true,
+		"skipLibCheck": true,
+		"sourceMap": true,
+		"declaration": true,
+		"declarationMap": true,
+		"emitDeclarationOnly": true,
+		"erasableSyntaxOnly": true,
+		"allowImportingTsExtensions": true,
+		"rewriteRelativeImportExtensions": true,
+		"verbatimModuleSyntax": true
+	},
+	"include": ["./src/**/*"]
+}
