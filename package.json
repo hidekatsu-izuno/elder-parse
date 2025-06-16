@@ -1,6 +1,6 @@
 {
 	"name": "elder-parse",
-	"version": "0.2.1",
+	"version": "0.3.0",
 	"description": "Lexer and parser library of a hand-written style.",
 	"type": "module",
 	"main": "./cjs/index.js",
@@ -18,7 +18,14 @@
 		"release": "git push --follow-tags origin main && npm publish",
 		"release:alpha": "git push --follow-tags origin main && npm publish --tag alpha"
 	},
-	"files": ["cjs/", "mjs/", "src/", "LICENSE", "package.json", "README.md"],
+	"files": [
+		"cjs/",
+		"mjs/",
+		"src/",
+		"LICENSE",
+		"package.json",
+		"README.md"
+	],
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/hidekatsu-izuno/elder-parse.git"
@@ -29,7 +36,10 @@
 		"url": "https://github.com/hidekatsu-izuno/elder-parse/issues"
 	},
 	"homepage": "https://github.com/hidekatsu-izuno/elder-parse#readme",
-	"keywords": ["lexer", "parser"],
+	"keywords": [
+		"lexer",
+		"parser"
+	],
 	"exports": {
 		".": {
 			"import": {
