@@ -23,11 +23,20 @@ suite("test cst", () => {
 		]);
 
 		assert.equal(cst.selectOne("> [type=b]"), cst.children[1]);
+
 		assert.equal(cst.selectOne("> node[type=b]"), cst.children[1]);
 		assert.equal(cst.selectOne("> *[type=b]"), cst.children[1]);
 		assert.equal(cst.selectOne("> [type=b][value=b2]"), cst.children[2]);
 		assert.equal(
 			cst.selectOne("> [type=b] > [type=ba]"),
+			(cst.children[2] as CstNode).children[1],
+		);
+		assert.equal(
+			cst.selectOne("> [type=b][value=b2]")?.selectOne("> [type=ba]"),
+			(cst.children[2] as CstNode).children[1],
+		);
+		assert.equal(
+			cst.selectOne(":scope > [type=b][value=b2]")?.selectOne(":scope > [type=ba]"),
 			(cst.children[2] as CstNode).children[1],
 		);
 
@@ -40,5 +49,6 @@ suite("test cst", () => {
 			cst.children[2],
 			(cst.children[2] as CstNode).children[0],
 		]);
+
 	});
 });

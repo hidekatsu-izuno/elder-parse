@@ -1,5 +1,5 @@
 import type { Options } from "css-select";
-import { compile, selectAll, selectOne } from "css-select";
+import { compile, is, selectAll, selectOne } from "css-select";
 import { CacheMap, escapeXml } from "./utils.ts";
 
 export type CstAttrs = {
@@ -138,20 +138,6 @@ class CstNodeAdapter
 	}
 }
 
-declare type CompiledQuery = ReturnType<
-	typeof compile<CstNode, CstNode>
->;
-const SELECTOR_CACHE = new CacheMap<string, CompiledQuery>(256);
-
-function getSeletor(pattern: string) {
-	let selector = SELECTOR_CACHE.get(pattern);
-	if (!selector) {
-		selector = compile<CstNode, CstNode>(pattern, CstNodeAdapter.OPTIONS);
-		SELECTOR_CACHE.set(pattern, selector);
-	}
-	return selector;
-}
-
 export class CstNode extends Array<CstAttrs | CstNode | string> {
 	static parseJSON(source: any): CstNode {
 		const node =
@@ -270,21 +256,18 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 	}
 
 	is(selector: string) {
-		const compiled = getSeletor(selector);
-		return compiled(this);
+		return is(this, selector, CstNodeAdapter.OPTIONS);
 	}
 
 	selectOne(selector: string): CstNode | undefined {
-		const compiled = getSeletor(selector);
 		return (
-			selectOne<CstNode, CstNode>(compiled, this, CstNodeAdapter.OPTIONS) ??
+			selectOne<CstNode, CstNode>(selector, [this], CstNodeAdapter.OPTIONS) ??
 			undefined
 		);
 	}
 
 	selectAll(selector: string): CstNode[] {
-		const compiled = getSeletor(selector);
-		return selectAll<CstNode, CstNode>(compiled, this, CstNodeAdapter.OPTIONS);
+		return selectAll<CstNode, CstNode>(selector, [this], CstNodeAdapter.OPTIONS);
 	}
 
 	text() {
@@ -302,38 +285,40 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 				out += `, "value": ${JSON.stringify(elem[1].value)}`;
 			}
 			out += " }";
-			for (let i = 2; i < elem.length; i++) {
-				const child = elem[i];
-				if (Array.isArray(child)) {
-					const token = child[0] === "token";
-					const trivia = child[0] === "trivia";
-					const marker = token && child.length <= 1;
-					if (
-						(token && options?.token === false) ||
-						(trivia && options?.trivia === false) ||
-						(marker && options?.marker === false)
-					) {
-						continue;
-					}
-					out += ",\n";
-					print(child, indent + 1);
-				} else {
-					out += ",";
-					if (elem[0] === "node") {
-						out += "\n";
-						for (let i = 0; i < indent + 1; i++) {
-							out += "\t";
+			if (elem.length > 2) {
+				for (let i = 2; i < elem.length; i++) {
+					const child = elem[i];
+					if (Array.isArray(child)) {
+						const token = child[0] === "token";
+						const trivia = child[0] === "trivia";
+						const marker = token && child.length <= 1;
+						if (
+							(token && options?.token === false) ||
+							(trivia && options?.trivia === false) ||
+							(marker && options?.marker === false)
+						) {
+							continue;
 						}
+						out += ",\n";
+						print(child, indent + 1);
 					} else {
-						out += " ";
+						out += ",";
+						if (elem[0] === "node") {
+							out += "\n";
+							for (let i = 0; i < indent + 1; i++) {
+								out += "\t";
+							}
+						} else {
+							out += " ";
+						}
+						out += JSON.stringify(child);
 					}
-					out += JSON.stringify(child);
 				}
-			}
-			if (elem[0] === "node") {
-				out += "\n";
-				for (let i = 0; i < indent; i++) {
-					out += "\t";
+				if (elem[0] === "node") {
+					out += "\n";
+					for (let i = 0; i < indent; i++) {
+						out += "\t";
+					}
 				}
 			}
 			out += "]";
@@ -352,39 +337,43 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 			if (elem[1].value != null) {
 				out += ` value="${escapeXml(elem[1].value.toString())}"`;
 			}
-			out += ">";
-			for (let i = 2; i < elem.length; i++) {
-				const child = elem[i];
-				if (Array.isArray(child)) {
-					const token = child[0] === "token";
-					const trivia = child[0] === "trivia";
-					const marker = token && child.length <= 1;
-					if (
-						(token && options?.token === false) ||
-						(trivia && options?.trivia === false) ||
-						(marker && options?.marker === false)
-					) {
-						continue;
-					}
-					out += "\n";
-					print(child, indent + 1);
-				} else {
-					if (elem[0] === "node") {
-						out += "\n";
-						for (let i = 0; i < indent + 1; i++) {
-							out += "\t";
+			if (elem.length > 2) {
+				out += ">";
+				for (let i = 2; i < elem.length; i++) {
+					const child = elem[i];
+					if (Array.isArray(child)) {
+						const token = child[0] === "token";
+						const trivia = child[0] === "trivia";
+						const marker = token && child.length <= 1;
+						if (
+							(token && options?.token === false) ||
+							(trivia && options?.trivia === false) ||
+							(marker && options?.marker === false)
+						) {
+							continue;
 						}
+						out += "\n";
+						print(child, indent + 1);
+					} else {
+						if (elem[0] === "node") {
+							out += "\n";
+							for (let i = 0; i < indent + 1; i++) {
+								out += "\t";
+							}
+						}
+						out += escapeXml(child.toString());
 					}
-					out += escapeXml(child.toString());
 				}
-			}
-			if (elem[0] === "node") {
-				out += "\n";
-				for (let i = 0; i < indent; i++) {
-					out += "\t";
+				if (elem[0] === "node") {
+					out += "\n";
+					for (let i = 0; i < indent; i++) {
+						out += "\t";
+					}
 				}
+				out += `</${escapeXml(elem[0])}>`;
+			} else {
+				out += ` />`;
 			}
-			out += `</${escapeXml(elem[0])}>`;
 		}
 		print(this, 0);
 		return out;
