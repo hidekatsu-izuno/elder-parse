@@ -36,7 +36,9 @@ suite("test cst", () => {
 			(cst.children[2] as CstNode).children[1],
 		);
 		assert.equal(
-			cst.selectOne(":scope > [type=b][value=b2]")?.selectOne(":scope > [type=ba]"),
+			cst
+				.selectOne(":scope > [type=b][value=b2]")
+				?.selectOne(":scope > [type=ba]"),
 			(cst.children[2] as CstNode).children[1],
 		);
 
@@ -49,6 +51,5 @@ suite("test cst", () => {
 			cst.children[2],
 			(cst.children[2] as CstNode).children[0],
 		]);
-
 	});
 });

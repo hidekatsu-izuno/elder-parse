@@ -267,7 +267,11 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 	}
 
 	selectAll(selector: string): CstNode[] {
-		return selectAll<CstNode, CstNode>(selector, [this], CstNodeAdapter.OPTIONS);
+		return selectAll<CstNode, CstNode>(
+			selector,
+			[this],
+			CstNodeAdapter.OPTIONS,
+		);
 	}
 
 	text() {

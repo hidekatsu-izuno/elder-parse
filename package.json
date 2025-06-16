@@ -18,14 +18,7 @@
 		"release": "git push --follow-tags origin main && npm publish",
 		"release:alpha": "git push --follow-tags origin main && npm publish --tag alpha"
 	},
-	"files": [
-		"cjs/",
-		"mjs/",
-		"src/",
-		"LICENSE",
-		"package.json",
-		"README.md"
-	],
+	"files": ["cjs/", "mjs/", "src/", "LICENSE", "package.json", "README.md"],
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/hidekatsu-izuno/elder-parse.git"
@@ -36,10 +29,7 @@
 		"url": "https://github.com/hidekatsu-izuno/elder-parse/issues"
 	},
 	"homepage": "https://github.com/hidekatsu-izuno/elder-parse#readme",
-	"keywords": [
-		"lexer",
-		"parser"
-	],
+	"keywords": ["lexer", "parser"],
 	"exports": {
 		".": {
 			"import": {
