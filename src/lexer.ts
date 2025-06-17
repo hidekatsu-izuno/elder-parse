@@ -300,7 +300,7 @@ export abstract class Lexer {
 		input: string,
 		start?: SourceLocation,
 	) {
-		const tokens = new Array<Token>();
+		const tokens: Token[] = [];
 		let pos = 0;
 		let lineNumber = start?.lineNumber ?? 1;
 		let columnNumber = start?.columnNumber ?? 0;

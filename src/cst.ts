@@ -1,6 +1,6 @@
 import type { Options } from "css-select";
-import { compile, is, selectAll, selectOne } from "css-select";
-import { CacheMap, escapeXml } from "./utils.ts";
+import { is, selectAll, selectOne } from "css-select";
+import { escapeXml } from "./utils.ts";
 
 export type CstAttrs = {
 	type: string;

@@ -30,7 +30,7 @@ export declare type FormatterOptions = {
 
 export abstract class Formatter {
 	parser: Parser;
-	private patterns = new Array<FormatPattern>();
+	private patterns = [] as FormatPattern[];
 	options: FormatterOptions;
 
 	constructor(
@@ -137,15 +137,15 @@ class FormatWriter {
 
 	private text = "";
 	private depth = 0;
-	private line = new Array<{
+	private line = [] as {
 		text: string;
 		depth: number;
 		nospace?: boolean;
-	}>();
+	}[];
 
 	private nospace = false;
 	private nobreak = false;
-	private actions = new Array<FormatActionType>();
+	private actions = [] as FormatActionType[];
 
 	constructor(options: FormatterOptions) {
 		this.printWidth = options.printWidth ?? 80;
