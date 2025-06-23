@@ -1,6 +1,6 @@
 {
 	"name": "elder-parse",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"description": "Lexer and parser library of a hand-written style.",
 	"type": "module",
 	"main": "./cjs/index.js",
@@ -55,7 +55,7 @@
 		"./package.json": "./package.json"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.0.0",
+		"@biomejs/biome": "2.0.5",
 		"@types/node": "^24.0.3",
 		"commit-and-tag-version": "^12.5.1",
 		"typescript": "^5.8.3"
