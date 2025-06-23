@@ -20,11 +20,11 @@ export class TokenType {
 	}
 
 	newKeyword(
-		text: string, 
+		text: string,
 		options?: {
-			ignoreCase?: boolean,
-			reserved?: boolean,
-		}
+			ignoreCase?: boolean;
+			reserved?: boolean;
+		},
 	) {
 		const keyword = new Keyword(text, options);
 		if (options?.ignoreCase) {
@@ -61,8 +61,8 @@ export class Keyword {
 	constructor(
 		name: string,
 		options?: {
-			ignoreCase?: boolean,
-			reserved?: boolean,
+			ignoreCase?: boolean;
+			reserved?: boolean;
 		},
 	) {
 		this.name = name;
@@ -247,7 +247,9 @@ export abstract class Lexer {
 		const state = {};
 		this.initState(state);
 
-		const location = this.options.location ? new SourceLocation(pos, 1, 0, source) : undefined;
+		const location = this.options.location
+			? new SourceLocation(pos, 1, 0, source)
+			: undefined;
 		return this.sublex(state, input, location);
 	}
 
@@ -306,7 +308,7 @@ export abstract class Lexer {
 			const token = new Token(pattern.type, text, {
 				location,
 			});
-			const keyword = token.type.getKeyword(token.text)
+			const keyword = token.type.getKeyword(token.text);
 			if (keyword) {
 				token.keyword = keyword;
 				if (this.reserved(keyword)) {
@@ -323,7 +325,7 @@ export abstract class Lexer {
 						continue;
 					}
 
-					const keyword = token.type.getKeyword(token.text)
+					const keyword = token.type.getKeyword(token.text);
 					if (keyword) {
 						newToken.keyword = keyword;
 						if (this.reserved(keyword)) {
