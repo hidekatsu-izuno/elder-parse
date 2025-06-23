@@ -1,25 +1,51 @@
 export class TokenType {
-	static Reserved = new TokenType("Reserved");
-	static EoF = new TokenType("EoF");
-	static Error = new TokenType("Error", { separator: true });
-
 	name: string;
 	skip: boolean;
 	separator: boolean;
-	keyword: boolean;
+
+	private hasKeyword = false;
+	private map: Record<string, Keyword> = {};
+	private imap: Record<string, Keyword> = {};
 
 	constructor(
 		name: string,
 		options?: {
 			skip?: boolean;
 			separator?: boolean;
-			keyword?: boolean;
 		},
 	) {
 		this.name = name;
 		this.skip = !!options?.skip;
 		this.separator = !!options?.separator;
-		this.keyword = !!options?.keyword;
+	}
+
+	newKeyword(
+		text: string, 
+		options?: {
+			ignoreCase?: boolean,
+			reserved?: boolean,
+		}
+	) {
+		const keyword = new Keyword(text, options);
+		if (options?.ignoreCase) {
+			this.imap[text.toLowerCase()] = keyword;
+		} else {
+			this.map[text] = keyword;
+		}
+		this.hasKeyword = true;
+		return keyword;
+	}
+
+	getKeyword(name: string): Keyword | undefined {
+		if (!this.hasKeyword) {
+			return;
+		}
+
+		const keyword = this.map[name];
+		if (keyword) {
+			return keyword;
+		}
+		return this.imap[name.toLowerCase()];
 	}
 
 	toString() {
@@ -30,91 +56,18 @@ export class TokenType {
 export class Keyword {
 	name: string;
 	ignoreCase: boolean;
+	reserved: boolean;
 
 	constructor(
 		name: string,
 		options?: {
-			ignoreCase?: boolean;
+			ignoreCase?: boolean,
+			reserved?: boolean,
 		},
 	) {
 		this.name = name;
 		this.ignoreCase = !!options?.ignoreCase;
-	}
-
-	toString() {
-		return this.name;
-	}
-}
-
-declare type KeywordMapEntry = {
-	keyword: Keyword;
-	options: {
-		reserved: boolean;
-		[key: string]: any;
-	};
-};
-
-export class KeywordMap {
-	private map: Record<string, KeywordMapEntry> = {};
-	private imap: Record<string, KeywordMapEntry> = {};
-
-	constructor(base?: KeywordMap) {
-		if (base) {
-			this.map = {};
-			for (const [key, value] of Object.entries(base.map)) {
-				this.map[key] = {
-					keyword: value.keyword,
-					options: { ...value.options },
-				};
-			}
-			this.imap = {};
-			for (const [key, value] of Object.entries(base.imap)) {
-				this.imap[key] = {
-					keyword: value.keyword,
-					options: { ...value.options },
-				};
-			}
-		} else {
-			for (const key of Object.keys(this.constructor)) {
-				const keyword = (this.constructor as any)[key];
-				if (keyword instanceof Keyword) {
-					const entry = {
-						keyword,
-						options: {
-							reserved: false,
-						},
-					};
-					const map = keyword.ignoreCase ? this.imap : this.map;
-					const key = keyword.ignoreCase
-						? keyword.name.toLowerCase()
-						: keyword.name;
-					map[key] = entry;
-				}
-			}
-		}
-	}
-
-	get(name: string): Keyword | undefined {
-		let entry = this.map[name];
-		if (entry) {
-			return entry.keyword;
-		}
-
-		entry = this.imap[name.toLowerCase()];
-		if (entry) {
-			return entry.keyword;
-		}
-	}
-
-	options(keyword: Keyword) {
-		const map = keyword.ignoreCase ? this.imap : this.map;
-		const key = keyword.ignoreCase ? keyword.name.toLowerCase() : keyword.name;
-		let entry = map[key];
-		if (!entry) {
-			entry = { keyword, options: { reserved: false } };
-			map[key] = entry;
-		}
-		return entry.options;
+		this.reserved = !!options?.reserved;
 	}
 }
 
@@ -170,7 +123,6 @@ export class Token {
 	type: TokenType;
 	text: string;
 	keyword?: Keyword;
-	eos: boolean;
 	preskips: Token[];
 	postskips: Token[];
 	location?: SourceLocation;
@@ -180,7 +132,6 @@ export class Token {
 		text: string,
 		options?: {
 			keyword?: Keyword;
-			eos?: boolean;
 			preskips?: Token[];
 			postskips?: Token[];
 			location?: SourceLocation;
@@ -189,7 +140,6 @@ export class Token {
 		this.type = type;
 		this.text = text;
 		this.keyword = options?.keyword;
-		this.eos = !!options?.eos;
 		this.preskips = options?.preskips ?? [];
 		this.postskips = options?.postskips ?? [];
 		this.location = options?.location;
@@ -221,7 +171,6 @@ export class Token {
 	clone() {
 		return new Token(this.type, this.text, {
 			keyword: this.keyword,
-			eos: this.eos,
 			preskips: [...this.preskips],
 			postskips: [...this.postskips],
 			location: this.location?.clone(),
@@ -255,11 +204,15 @@ export declare type TokenPattern = {
 
 export declare type LexerOptions = {
 	skipTokenStrategy?: "ignore" | "next" | "adaptive";
-	keywords?: KeywordMap;
+	location?: boolean;
 	[key: string]: any;
 };
 
 export abstract class Lexer {
+	static Reserved = new TokenType("Reserved");
+	static EoF = new TokenType("EoF");
+	static Error = new TokenType("Error", { separator: true });
+
 	name: string;
 	patterns: TokenPattern[];
 	options: LexerOptions = {};
@@ -272,14 +225,17 @@ export abstract class Lexer {
 		this.name = name;
 		this.patterns = [
 			...patterns,
-			{ type: TokenType.Error, re: /./y, separator: true },
+			{ type: Lexer.Error, re: /./y, separator: true },
 		];
-		this.options = options;
-		if (!options.skipTokenStrategy) {
-			options.skipTokenStrategy = "adaptive";
+		this.options = { ...options };
+		if (!this.options.skipTokenStrategy) {
+			this.options.skipTokenStrategy = "adaptive";
 		}
-		if (options.patternFilter) {
-			this.patterns = options.patternFilter(this.patterns);
+		if (this.options.location === undefined) {
+			this.options.location = true;
+		}
+		if (this.options.patternFilter) {
+			this.patterns = this.options.patternFilter(this.patterns);
 		}
 	}
 
@@ -290,7 +246,13 @@ export abstract class Lexer {
 		}
 		const state = {};
 		this.initState(state);
-		return this.sublex(state, input, new SourceLocation(pos, 1, 0, source));
+
+		const location = this.options.location ? new SourceLocation(pos, 1, 0, source) : undefined;
+		return this.sublex(state, input, location);
+	}
+
+	reserved(keyword: Keyword) {
+		return keyword.reserved;
 	}
 
 	protected initState(state: Record<string, any>) {}
@@ -344,13 +306,11 @@ export abstract class Lexer {
 			const token = new Token(pattern.type, text, {
 				location,
 			});
-			if (this.options.keywords && token.type.keyword) {
-				const keyword = this.options.keywords.get(token.text);
-				if (keyword) {
-					token.keyword = keyword;
-					if (this.options.keywords.options(keyword).reserved) {
-						token.type = TokenType.Reserved;
-					}
+			const keyword = token.type.getKeyword(token.text)
+			if (keyword) {
+				token.keyword = keyword;
+				if (this.reserved(keyword)) {
+					token.type = Lexer.Reserved;
 				}
 			}
 			const newTokens = pattern.onMatch?.(state, token);
@@ -358,18 +318,16 @@ export abstract class Lexer {
 				skips.push(...newTokens[0].preskips);
 				newTokens[0].preskips = [];
 
-				if (this.options.keywords) {
-					for (const newToken of newTokens) {
-						if (newToken.keyword) {
-							continue;
-						}
+				for (const newToken of newTokens) {
+					if (newToken.keyword) {
+						continue;
+					}
 
-						const keyword = this.options.keywords.get(token.text);
-						if (keyword) {
-							newToken.keyword = keyword;
-							if (this.options.keywords.options(keyword).reserved) {
-								newToken.type = TokenType.Reserved;
-							}
+					const keyword = token.type.getKeyword(token.text)
+					if (keyword) {
+						newToken.keyword = keyword;
+						if (this.reserved(keyword)) {
+							newToken.type = Lexer.Reserved;
 						}
 					}
 				}
@@ -401,7 +359,7 @@ export abstract class Lexer {
 			}
 			if (newTokens && newTokens.length > 0) {
 				const last = tokens[tokens.length - 1];
-				if (last && last.type === TokenType.EoF) {
+				if (last && last.type === Lexer.EoF) {
 					if (this.options.skipTokenStrategy !== "ignore") {
 						skips.push(...last.preskips);
 						skips.push(...last.postskips);
@@ -427,8 +385,7 @@ export abstract class Lexer {
 		}
 
 		tokens.push(
-			new Token(TokenType.EoF, "", {
-				eos: true,
+			new Token(Lexer.EoF, "", {
 				preskips: skips,
 				location: start
 					? new SourceLocation(
