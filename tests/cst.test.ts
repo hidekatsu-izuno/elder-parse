@@ -3,6 +3,23 @@ import { suite, test } from "node:test";
 import { CstNode } from "../src/cst.ts";
 
 suite("test cst", () => {
+	test("test is", () => {
+		const cst = CstNode.parseJSON([
+			"node",
+			{ type: "a" },
+			[
+				"node",
+				{ type: "b", value: "b2" },
+				["node", { type: "b", value: "b3" }],
+				["node", { type: "ba", value: "ba1" }],
+				["node", { type: "ba", value: "ba2" }],
+				["node", { type: "ba", value: "ba3" }],
+			],
+		]);
+		assert.equal(cst.is("[type=a]"), true);
+		assert.equal(cst.is(":has(> [type=b])"), true);
+	});
+
 	test("test selectOne/selectAll", () => {
 		const cst = CstNode.parseJSON([
 			"node",
@@ -51,5 +68,23 @@ suite("test cst", () => {
 			cst.children[2],
 			(cst.children[2] as CstNode).children[0],
 		]);
+	});
+
+	test("test remove", () => {
+		const cst = CstNode.parseJSON([
+			"node",
+			{ type: "a" },
+			[
+				"node",
+				{ type: "b", value: "b2" },
+				["node", { type: "b", value: "b3" }],
+				["node", { type: "ba", value: "ba1" }],
+				["node", { type: "ba", value: "ba2" }],
+				["node", { type: "ba", value: "ba3" }],
+			],
+		]);
+		const nodeB = cst.selectOne("> [type=b]") as CstNode;
+		cst.remove(nodeB);
+		assert.equal(cst.selectOne("> [type=b]"), undefined);
 	});
 });

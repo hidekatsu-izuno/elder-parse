@@ -2,6 +2,7 @@ export class TokenType {
 	name: string;
 	skip: boolean;
 	separator: boolean;
+	marker: boolean;
 
 	private hasKeyword = false;
 	private map: Record<string, Keyword> = {};
@@ -12,11 +13,13 @@ export class TokenType {
 		options?: {
 			skip?: boolean;
 			separator?: boolean;
+			marker?: boolean;
 		},
 	) {
 		this.name = name;
 		this.skip = !!options?.skip;
 		this.separator = !!options?.separator;
+		this.marker = !!options?.marker;
 	}
 
 	newKeyword(

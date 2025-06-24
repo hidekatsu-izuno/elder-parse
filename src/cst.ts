@@ -255,6 +255,18 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 		}
 	}
 
+	remove(node: CstNode | string) {
+		for (let i = this.length - 1; i > 1; i--) {
+			if (this[i] === node) {
+				this.splice(i, 1);
+				if (node instanceof CstNode) {
+					delete node[1][KEY_PARENT];
+				}
+			}
+		}
+		return node;
+	}
+
 	is(selector: string) {
 		return is(this, selector, CstNodeAdapter.OPTIONS);
 	}
@@ -278,7 +290,7 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 		return this.toPlainString();
 	}
 
-	toJSONString(options?: CstPrintOptions) {
+	toJSONString() {
 		let out = "";
 		function print(elem: CstNode, indent: number) {
 			for (let i = 0; i < indent; i++) {
@@ -293,16 +305,6 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 				for (let i = 2; i < elem.length; i++) {
 					const child = elem[i];
 					if (Array.isArray(child)) {
-						const token = child[0] === "token";
-						const trivia = child[0] === "trivia";
-						const marker = token && child.length <= 1;
-						if (
-							(token && options?.token === false) ||
-							(trivia && options?.trivia === false) ||
-							(marker && options?.marker === false)
-						) {
-							continue;
-						}
 						out += ",\n";
 						print(child, indent + 1);
 					} else {
@@ -331,7 +333,7 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 		return out;
 	}
 
-	toXMLString(options?: CstPrintOptions) {
+	toXMLString() {
 		let out = "";
 		function print(elem: CstNode, indent: number) {
 			for (let i = 0; i < indent; i++) {
@@ -346,16 +348,6 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 				for (let i = 2; i < elem.length; i++) {
 					const child = elem[i];
 					if (Array.isArray(child)) {
-						const token = child[0] === "token";
-						const trivia = child[0] === "trivia";
-						const marker = token && child.length <= 1;
-						if (
-							(token && options?.token === false) ||
-							(trivia && options?.trivia === false) ||
-							(marker && options?.marker === false)
-						) {
-							continue;
-						}
 						out += "\n";
 						print(child, indent + 1);
 					} else {
@@ -383,22 +375,12 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 		return out;
 	}
 
-	toPlainString(options?: CstPrintOptions) {
+	toPlainString() {
 		let out = "";
 		function print(elem: CstNode, indent: number) {
 			for (let i = 2; i < elem.length; i++) {
 				const child = elem[i];
 				if (Array.isArray(child)) {
-					const token = child[0] === "token";
-					const trivia = child[0] === "trivia";
-					const marker = token && child.length <= 1;
-					if (
-						(token && options?.token === false) ||
-						(trivia && options?.trivia === false) ||
-						(marker && options?.marker === false)
-					) {
-						continue;
-					}
 					print(child, indent + 1);
 				} else {
 					out += child.toString();

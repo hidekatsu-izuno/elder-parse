@@ -77,21 +77,21 @@ export class CstBuilder {
 		return this.current;
 	}
 
-	type(type: string, context?: CstNode) {
+	attr(name: string, value: string | number | boolean, context?: CstNode) {
 		const current = context ?? this.current;
-		current[1].type = type;
-		return current[1].type;
-	}
-
-	value(value: string | number | boolean, context?: CstNode) {
-		const current = context ?? this.current;
-		current[1].value = value.toString();
-		return current[1].value;
+		current[1][name] = value;
+		return value;
 	}
 
 	append(child: CstNode, context?: CstNode) {
 		const current = context ?? this.current;
 		current.append(child);
+		return child;
+	}
+
+	remove(child: CstNode, context?: CstNode) {
+		const current = context ?? this.current;
+		current.remove(child);
 		return child;
 	}
 
@@ -118,13 +118,7 @@ export class CstBuilder {
 				elem.append(trivia);
 			}
 		}
-		if (
-			!this.options.token ||
-			this.options.marker ||
-			token.text ||
-			(this.options.trivia &&
-				(token.preskips.length !== 0 || token.postskips.length !== 0))
-		) {
+		if (this.options.token && (!token.type.marker || this.options.marker)) {
 			const current = context ?? this.current;
 			current.append(elem);
 		}
