@@ -223,12 +223,8 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 		return this[0];
 	}
 
-	get type(): string {
-		return this[1].type;
-	}
-
-	get value(): string | number | boolean | undefined {
-		return this[1].value;
+	get attrs(): Readonly<Record<string, string | number | boolean | undefined>> {
+		return this[1];
 	}
 
 	get parent(): CstNode | undefined {
