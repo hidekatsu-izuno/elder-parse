@@ -1,6 +1,6 @@
 {
 	"name": "elder-parse",
-	"version": "0.3.3",
+	"version": "0.3.4",
 	"description": "Lexer and parser library of a hand-written style.",
 	"type": "module",
 	"main": "./cjs/index.js",
