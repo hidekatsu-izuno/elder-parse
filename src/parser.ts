@@ -1,15 +1,15 @@
-import { CstNode } from "./cst.ts";
-import type { Lexer, Token } from "./lexer.ts";
+import { type CstAttrs, CstNode } from "./cst.ts";
+import { type Lexer, type Token, TokenReader } from "./lexer.ts";
 
-export declare type ParserOptions = {
-	[key: string]: string;
+export declare type ParserOptions = CstBuilderOptions & {
+	[key: string]: any;
 };
 
-export abstract class Parser {
-	private lexer: Lexer;
+export abstract class Parser<L extends Lexer> {
+	private lexer: L;
 	private options: ParserOptions;
 
-	constructor(lexer: typeof this.lexer, options: typeof this.options = {}) {
+	constructor(lexer: L, options: ParserOptions = {}) {
 		this.lexer = lexer;
 		this.options = options;
 	}
@@ -18,12 +18,16 @@ export abstract class Parser {
 		const tokens = Array.isArray(script)
 			? script
 			: this.lexer.lex(script, filename);
+		const reader = new TokenReader(tokens);
 		const builder = new CstBuilder(this.options);
-		this.parseTokens(tokens, builder);
+		this.parseTokens(reader, builder);
 		return builder.root;
 	}
 
-	abstract parseTokens(tokens: Token[], builder: CstBuilder): void;
+	protected abstract parseTokens(
+		reader: TokenReader,
+		builder: CstBuilder,
+	): void;
 }
 
 export class AggregateParseError extends Error {
@@ -38,6 +42,7 @@ export class AggregateParseError extends Error {
 }
 
 export declare type CstBuilderOptions = {
+	meta?: boolean;
 	token?: boolean;
 	trivia?: boolean;
 	marker?: boolean;
@@ -48,6 +53,7 @@ export class CstBuilder {
 	root: CstNode;
 	current: CstNode;
 	options: {
+		meta: boolean;
 		token: boolean;
 		trivia: boolean;
 		marker: boolean;
@@ -57,6 +63,7 @@ export class CstBuilder {
 		this.root = EMPTY_NODE;
 		this.current = EMPTY_NODE;
 		this.options = {
+			meta: options.meta ?? true,
 			token: options.token ?? true,
 			trivia: options.trivia ?? true,
 			marker: options.marker ?? true,
@@ -93,6 +100,15 @@ export class CstBuilder {
 		const current = context ?? this.current;
 		current.remove(child);
 		return child;
+	}
+
+	meta(attrs: CstAttrs, context?: CstNode) {
+		const meta = new CstNode("meta", attrs);
+		if (this.options.meta) {
+			const current = context ?? this.current;
+			current.append(meta);
+		}
+		return meta;
 	}
 
 	token(token: Token, context?: CstNode) {

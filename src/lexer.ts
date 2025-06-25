@@ -17,9 +17,9 @@ export class TokenType {
 		},
 	) {
 		this.name = name;
-		this.skip = !!options?.skip;
-		this.separator = !!options?.separator;
-		this.marker = !!options?.marker;
+		this.skip = options?.skip ?? false;
+		this.separator = options?.separator ?? false;
+		this.marker = options?.marker ?? false;
 	}
 
 	newKeyword(
@@ -213,7 +213,7 @@ export declare type LexerOptions = {
 
 export abstract class Lexer {
 	static Reserved = new TokenType("Reserved");
-	static EoF = new TokenType("EoF");
+	static EoF = new TokenType("EoF", { marker: true });
 	static Error = new TokenType("Error", { separator: true });
 
 	name: string;

@@ -38,6 +38,9 @@
 			},
 			"performance": {
 				"noDelete": "off"
+			},
+			"complexity": {
+				"noUselessLoneBlockStatements": "off"
 			}
 		}
 	},

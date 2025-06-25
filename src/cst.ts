@@ -293,8 +293,10 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 				out += "\t";
 			}
 			out += `[${JSON.stringify(elem[0])}, { "type": ${JSON.stringify(elem[1].type)}`;
-			if (elem[1].value != null) {
-				out += `, "value": ${JSON.stringify(elem[1].value)}`;
+			for (const key of Object.keys(elem[1]).sort()) {
+				if (key !== "type") {
+					out += `, ${JSON.stringify(key)}: ${JSON.stringify(elem[1][key])}`;
+				}
 			}
 			out += " }";
 			if (elem.length > 2) {
@@ -336,8 +338,11 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 				out += "\t";
 			}
 			out += `<${escapeXml(elem[0])} type="${escapeXml(elem[1].type)}"`;
-			if (elem[1].value != null) {
-				out += ` value="${escapeXml(elem[1].value.toString())}"`;
+			for (const key of Object.keys(elem[1]).sort()) {
+				if (key !== "type") {
+					const value = elem[1][key];
+					out += ` ${escapeXml(key)}="${escapeXml(value != null ? value.toString() : "")}"`;
+				}
 			}
 			if (elem.length > 2) {
 				out += ">";
