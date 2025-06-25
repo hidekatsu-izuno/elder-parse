@@ -15,10 +15,14 @@ suite("test cst", () => {
 				["node", { type: "ba", value: "ba2" }],
 				["node", { type: "ba", value: "ba3" }],
 			],
+			["node", { type: "c" }],
 		]);
 		assert.equal(cst.is("[type=a]"), true);
 		assert.equal(cst.is(":has(> [type=b])"), true);
-		assert.equal(cst.is(":has(> [type=b]:has(> [type=ba]))"), true);
+		assert.equal(cst.is(":has(> [type=c])"), true);
+		assert.equal(cst.is(":has(> [type=ba])"), false);
+		assert.equal(!!cst.selectOne("> [type=b] > [type=ba]"), true);
+		assert.equal(cst.is(":has(> [type=b] > [type=ba])"), false);
 	});
 
 	test("test selectOne/selectAll", () => {

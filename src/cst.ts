@@ -25,7 +25,7 @@ class CstNodeAdapter
 	};
 
 	isTag(node: CstNode): node is CstNode {
-		return Array.isArray(node);
+		return node instanceof CstNode;
 	}
 
 	existsOne(test: (elem: CstNode) => boolean, elems: CstNode[]) {
@@ -49,7 +49,7 @@ class CstNodeAdapter
 		const result: CstNode[] = [];
 		for (let i = 2; i < node.length; i++) {
 			const child = node[i];
-			if (Array.isArray(child)) {
+			if (child instanceof CstNode) {
 				result.push(child);
 			}
 		}
@@ -70,7 +70,7 @@ class CstNodeAdapter
 		if (parent) {
 			for (let i = 2; i < parent.length; i++) {
 				const child = parent[i];
-				if (Array.isArray(child)) {
+				if (child instanceof CstNode) {
 					result.push(child);
 				}
 			}
@@ -82,7 +82,7 @@ class CstNodeAdapter
 		let str = "";
 		for (let i = 2; i < node.length; i++) {
 			const child = node[i];
-			if (Array.isArray(child)) {
+			if (child instanceof CstNode) {
 				str += this.getText(child);
 			}
 		}
@@ -101,7 +101,7 @@ class CstNodeAdapter
 			}
 			for (let i = 2; i < current.length; i++) {
 				const child = current[i];
-				if (Array.isArray(child)) {
+				if (child instanceof CstNode) {
 					traverse(child);
 				}
 			}
@@ -119,7 +119,7 @@ class CstNodeAdapter
 			}
 			for (let i = 2; i < current.length; i++) {
 				const child = current[i];
-				if (Array.isArray(child)) {
+				if (child instanceof CstNode) {
 					const result = traverse(child);
 					if (result != null) {
 						return result;
@@ -181,7 +181,7 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 				Object.setPrototypeOf(current, CstNode.prototype);
 				for (let i = 2; i < current.length; i++) {
 					const child = current[i];
-					if (Array.isArray(child)) {
+					if (Array.isArray(child) && typeof child[0] === "string") {
 						traverse(child);
 						child[1][KEY_PARENT] = current;
 					} else if (typeof child !== "string") {
