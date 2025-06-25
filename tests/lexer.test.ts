@@ -37,8 +37,11 @@ class TestLexer extends Lexer {
 				{ type: TestLexer.Prime, re: /[*]/y },
 				{ type: TestLexer.Slash, re: /[/]/y },
 				{ type: TestLexer.Numeric, re: /(?:0|[1-9][0-9]*)(?:\.[0-9]*)?/y },
-				{ type: TestLexer.Identifier, re: /[A-Za-z][A-Za-z0-9]*/y, 
-					onMatch: (state, token) => this.onMatchIdentifier(token) },
+				{
+					type: TestLexer.Identifier,
+					re: /[A-Za-z][A-Za-z0-9]*/y,
+					onMatch: (state, token) => this.onMatchIdentifier(token),
+				},
 			],
 			options,
 		);
@@ -46,10 +49,7 @@ class TestLexer extends Lexer {
 
 	private onMatchIdentifier(token: Token) {
 		if (token.is(TestLexer.CALC)) {
-			return [
-				new Token(TestLexer.Start, ""),
-				token,
-			];
+			return [new Token(TestLexer.Start, ""), token];
 		}
 	}
 }
@@ -323,7 +323,7 @@ suite("test lexer and parser", () => {
 							],
 						],
 					],
-				]
+				],
 			]).toJSONString(),
 		);
 	});

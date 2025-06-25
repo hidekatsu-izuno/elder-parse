@@ -5,8 +5,11 @@ import { CstNode } from "../src/cst.ts";
 suite("test cst", () => {
 	test("test is", () => {
 		const cst = CstNode.parseJSON([
-			"node", { type: "a" },
-			["node", { type: "b", value: "b2" },
+			"node",
+			{ type: "a" },
+			[
+				"node",
+				{ type: "b", value: "b2" },
 				["node", { type: "b", value: "b3" }],
 				["node", { type: "ba", value: "ba1" }],
 				["node", { type: "ba", value: "ba2" }],

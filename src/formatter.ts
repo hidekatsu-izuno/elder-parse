@@ -1,5 +1,6 @@
 import { EOL } from "node:os";
 import { CstNode } from "./cst.ts";
+import type { Lexer } from "./lexer.ts";
 import { AggregateParseError, type Parser } from "./parser.ts";
 
 export declare type ContentActionType = "multiline" | "noprint";
@@ -28,13 +29,13 @@ export declare type FormatterOptions = {
 	[key: string]: any;
 };
 
-export abstract class Formatter {
-	parser: Parser;
+export abstract class Formatter<L extends Lexer> {
+	parser: Parser<L>;
 	private patterns = [] as FormatPattern[];
 	options: FormatterOptions;
 
 	constructor(
-		parser: Parser,
+		parser: Parser<L>,
 		patterns: FormatPattern[],
 		options: FormatterOptions = {},
 	) {

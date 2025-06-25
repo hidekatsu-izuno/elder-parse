@@ -8,15 +8,11 @@
 			"type": "node",
 			"request": "launch",
 			"name": "npm test",
-			"skipFiles": [
-				"<node_internals>/**"
-			],
+			"skipFiles": ["<node_internals>/**"],
 			"runtimeExecutable": "npm",
 			"runtimeArgs": ["test"],
 			"outFiles": ["${workspaceFolder}/**/*.js"],
-			"resolveSourceMapLocations": [
-				"node_modules/css-select/**/*.js"
-			]
+			"resolveSourceMapLocations": ["node_modules/css-select/**/*.js"]
 		}
 	]
 }
