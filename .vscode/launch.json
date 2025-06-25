@@ -9,12 +9,14 @@
 			"request": "launch",
 			"name": "npm test",
 			"skipFiles": [
-				"${workspaceFolder}/<node_internals>/**",
-				"${workspaceFolder}/node_modules/**"
+				"<node_internals>/**"
 			],
 			"runtimeExecutable": "npm",
 			"runtimeArgs": ["test"],
-			"outFiles": ["${workspaceFolder}/**/*.js"]
+			"outFiles": ["${workspaceFolder}/**/*.js"],
+			"resolveSourceMapLocations": [
+				"node_modules/css-select/**/*.js"
+			]
 		}
 	]
 }

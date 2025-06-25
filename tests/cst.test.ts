@@ -5,11 +5,8 @@ import { CstNode } from "../src/cst.ts";
 suite("test cst", () => {
 	test("test is", () => {
 		const cst = CstNode.parseJSON([
-			"node",
-			{ type: "a" },
-			[
-				"node",
-				{ type: "b", value: "b2" },
+			"node", { type: "a" },
+			["node", { type: "b", value: "b2" },
 				["node", { type: "b", value: "b3" }],
 				["node", { type: "ba", value: "ba1" }],
 				["node", { type: "ba", value: "ba2" }],
@@ -18,6 +15,7 @@ suite("test cst", () => {
 		]);
 		assert.equal(cst.is("[type=a]"), true);
 		assert.equal(cst.is(":has(> [type=b])"), true);
+		assert.equal(cst.is(":has(> [type=b]:has(> [type=ba]))"), true);
 	});
 
 	test("test selectOne/selectAll", () => {
