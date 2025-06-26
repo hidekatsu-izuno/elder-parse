@@ -24,8 +24,8 @@ class CstNodeAdapter
 		pseudos: {
 			x_has(elem: CstNode, value?: string | null) {
 				return !!(value && selectOne(value, [elem], CstNodeAdapter.OPTIONS));
-			}
-		}
+			},
+		},
 	};
 
 	static filterSelector(selector: string) {
@@ -271,16 +271,20 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 	}
 
 	is(selector: string) {
-		return is(this, CstNodeAdapter.filterSelector(selector), CstNodeAdapter.OPTIONS);
+		return is(
+			this,
+			CstNodeAdapter.filterSelector(selector),
+			CstNodeAdapter.OPTIONS,
+		);
 	}
 
 	selectOne(selector: string): CstNode | undefined {
 		return (
 			selectOne<CstNode, CstNode>(
-				CstNodeAdapter.filterSelector(selector), 
-				[this], 
-				CstNodeAdapter.OPTIONS) ??
-			undefined
+				CstNodeAdapter.filterSelector(selector),
+				[this],
+				CstNodeAdapter.OPTIONS,
+			) ?? undefined
 		);
 	}
 

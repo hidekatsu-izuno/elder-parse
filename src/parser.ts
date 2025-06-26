@@ -1,9 +1,15 @@
 import { type CstAttrs, CstNode } from "./cst.ts";
-import { type Lexer, type LexerOptions, type Token, TokenReader } from "./lexer.ts";
+import {
+	type Lexer,
+	type LexerOptions,
+	type Token,
+	TokenReader,
+} from "./lexer.ts";
 
-export declare type ParserOptions = LexerOptions & CstBuilderOptions & {
-	[key: string]: any;
-};
+export declare type ParserOptions = LexerOptions &
+	CstBuilderOptions & {
+		[key: string]: any;
+	};
 
 export abstract class Parser<L extends Lexer> {
 	private lexer: L;
