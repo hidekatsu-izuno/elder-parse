@@ -256,7 +256,7 @@ export abstract class Lexer {
 		return this.sublex(state, input, location);
 	}
 
-	reserved(keyword: Keyword) {
+	isReserved(keyword: Keyword) {
 		return keyword.reserved;
 	}
 
@@ -314,7 +314,7 @@ export abstract class Lexer {
 			const keyword = token.type.getKeyword(token.text);
 			if (keyword) {
 				token.keyword = keyword;
-				if (this.reserved(keyword)) {
+				if (this.isReserved(keyword)) {
 					token.type = Lexer.Reserved;
 				}
 			}
@@ -331,7 +331,7 @@ export abstract class Lexer {
 					const keyword = token.type.getKeyword(token.text);
 					if (keyword) {
 						newToken.keyword = keyword;
-						if (this.reserved(keyword)) {
+						if (this.isReserved(keyword)) {
 							newToken.type = Lexer.Reserved;
 						}
 					}
