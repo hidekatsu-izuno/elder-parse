@@ -21,7 +21,16 @@ class CstNodeAdapter
 	static OPTIONS: Options<CstNode, CstNode> = {
 		xmlMode: true,
 		adapter: new CstNodeAdapter(),
+		pseudos: {
+			x_has(elem: CstNode, value?: string | null) {
+				return !!(value && selectOne(value, [elem], CstNodeAdapter.OPTIONS));
+			}
+		}
 	};
+
+	static filterSelector(selector: string) {
+		return selector.replace(/:has\(/g, ":x_has(");
+	}
 
 	isTag(node: CstNode): node is CstNode {
 		return node instanceof CstNode;
@@ -262,19 +271,22 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 	}
 
 	is(selector: string) {
-		return is(this, selector, CstNodeAdapter.OPTIONS);
+		return is(this, CstNodeAdapter.filterSelector(selector), CstNodeAdapter.OPTIONS);
 	}
 
 	selectOne(selector: string): CstNode | undefined {
 		return (
-			selectOne<CstNode, CstNode>(selector, [this], CstNodeAdapter.OPTIONS) ??
+			selectOne<CstNode, CstNode>(
+				CstNodeAdapter.filterSelector(selector), 
+				[this], 
+				CstNodeAdapter.OPTIONS) ??
 			undefined
 		);
 	}
 
 	selectAll(selector: string): CstNode[] {
 		return selectAll<CstNode, CstNode>(
-			selector,
+			CstNodeAdapter.filterSelector(selector),
 			[this],
 			CstNodeAdapter.OPTIONS,
 		);

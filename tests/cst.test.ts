@@ -22,7 +22,7 @@ suite("test cst", () => {
 		assert.equal(cst.is(":has(> [type=c])"), true);
 		assert.equal(cst.is(":has(> [type=ba])"), false);
 		assert.equal(!!cst.selectOne("> [type=b] > [type=ba]"), true);
-		assert.equal(cst.is(":has(> [type=b] > [type=ba])"), false);
+		assert.equal(cst.is(":has(> [type=b] > [type=ba])"), true);
 	});
 
 	test("test selectOne/selectAll", () => {
