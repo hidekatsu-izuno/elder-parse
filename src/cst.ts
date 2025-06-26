@@ -4,7 +4,6 @@ import { escapeXml } from "./utils.ts";
 
 export type CstAttrs = {
 	type: string;
-	value?: string | number | boolean;
 	[name: string]: string | number | boolean | undefined;
 };
 
@@ -145,20 +144,19 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 				? JSON.parse(source, (key, value) => {
 						if (value?.constructor === Object) {
 							return Object.keys(value).reduce((obj: any, key: string) => {
+								const type = value[key];
 								if (key === "type") {
-									if (typeof value[key] === "string") {
+									if (type === "string") {
 										obj[key] = value[key];
 									} else {
 										obj[key] = "";
 									}
-								} else if (key === "value") {
-									if (
-										typeof value[key] === "string" ||
-										typeof value[key] === "number" ||
-										typeof value[key] === "boolean"
-									) {
-										obj[key] = value[key];
-									}
+								} else if (
+									type === "string" ||
+									type === "number" ||
+									type === "boolean"
+								) {
+									obj[key] = value[key];
 								}
 								return obj;
 							}, {});

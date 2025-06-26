@@ -10,3 +10,11 @@ npm run release:alpha
 npm run version:patch
 npm run release
 -->
+
+## Setup
+
+Install the package using npm:
+
+```bash
+npm install elder-parse
+```

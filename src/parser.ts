@@ -1,7 +1,7 @@
 import { type CstAttrs, CstNode } from "./cst.ts";
-import { type Lexer, type Token, TokenReader } from "./lexer.ts";
+import { type Lexer, type LexerOptions, type Token, TokenReader } from "./lexer.ts";
 
-export declare type ParserOptions = CstBuilderOptions & {
+export declare type ParserOptions = LexerOptions & CstBuilderOptions & {
 	[key: string]: any;
 };
 
@@ -70,11 +70,8 @@ export class CstBuilder {
 		};
 	}
 
-	start(type: string, value?: string | number | boolean) {
-		const elem = new CstNode("node", { type });
-		if (value != null) {
-			elem[1].value = value;
-		}
+	start(type: string, attrs?: Omit<CstAttrs, "type">) {
+		const elem = new CstNode("node", attrs ? { ...attrs, type } : { type });
 		if (this.current === EMPTY_NODE) {
 			this.root = elem;
 		} else {

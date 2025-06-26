@@ -55,7 +55,7 @@ class TestLexer extends Lexer {
 }
 
 class TestParser extends Parser<TestLexer> {
-	constructor(options?: LexerOptions & ParserOptions) {
+	constructor(options?: ParserOptions) {
 		super(new TestLexer(options), options);
 	}
 
