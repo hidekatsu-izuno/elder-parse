@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.3.7](https://github.com/hidekatsu-izuno/elder-parse/compare/v0.3.6...v0.3.7) (2025-06-26)
+
+
+### Features
+
+* add pseudo-selector support and update tests for new behavior ([5a9fe8a](https://github.com/hidekatsu-izuno/elder-parse/commit/5a9fe8a38642d8c7bdaf601e14d988949398a76c))
+
+
+### Bug Fixes
+
+* format code for consistency and improve readability in cst.ts and parser.ts ([a7f14c3](https://github.com/hidekatsu-izuno/elder-parse/commit/a7f14c3368afba76b51df3c406d9f13001fd08a0))
+* improve type checking in CstNodeAdapter and update tests for new behavior ([7065483](https://github.com/hidekatsu-izuno/elder-parse/commit/7065483a636858b18857fd4ffd931f148f9992f2))
+* update README setup instructions and improve type handling in parser and lexer ([56f2f55](https://github.com/hidekatsu-izuno/elder-parse/commit/56f2f556d5f2a02be81e9f68fd7f5e11a73f696f))
+
 ## [0.3.6](https://github.com/hidekatsu-izuno/elder-parse/compare/v0.3.5...v0.3.6) (2025-06-25)
 
 ## [0.3.5](https://github.com/hidekatsu-izuno/elder-parse/compare/v0.3.4...v0.3.5) (2025-06-25)
