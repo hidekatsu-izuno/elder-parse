@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.3.8](https://github.com/hidekatsu-izuno/elder-parse/compare/v0.3.7...v0.3.8) (2025-06-27)
+
+
+### Bug Fixes
+
+* improve code formatting and consistency in cst.ts and cst.test.ts ([f8590b1](https://github.com/hidekatsu-izuno/elder-parse/commit/f8590b1d2b7bc9afbdaee55b1861809fab88e0a4))
+
 ## [0.3.7](https://github.com/hidekatsu-izuno/elder-parse/compare/v0.3.6...v0.3.7) (2025-06-26)
 
 
