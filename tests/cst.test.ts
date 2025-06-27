@@ -1,8 +1,49 @@
 import assert from "node:assert/strict";
 import { suite, test } from "node:test";
 import { CstNode } from "../src/cst.ts";
+import { CstBuilder } from "../src/parser.ts";
+import { Token, TokenType } from "../src/lexer.ts"
 
 suite("test cst", () => {
+	test("test parse", () => {
+		const actual = CstNode.parseJSON(`
+			["node", { "type": "a" },
+				["node", { "type": "b", "attr": "b2" },
+					["node", { "type": "text", "value": "text" },
+						["token", { "type": "token" }, "test"]
+					],
+					["node", { "type": "100", "value": 100 }],
+					["node", { "type": "true", "value": true }],
+					["node", { "type": "undefined" }]
+				],
+				["meta", { "extra": "c" }]
+			]
+		`);
+		const builder = new CstBuilder();
+		builder.start("a");
+		{
+			builder.start("b", { attr: "b2" });
+			{
+				builder.start("text", { value: "text" });
+				builder.token(new Token(new TokenType("token"), "test"));
+				builder.end();
+
+				builder.start("100", { value: 100 });
+				builder.end();
+				
+				builder.start("true", { value: true });
+				builder.end();
+								
+				builder.start("undefined", { value: undefined });
+				builder.end();
+			}
+			builder.end();
+			builder.meta({ extra: "c" });
+		}
+		const expected = builder.end();
+		assert.deepEqual(actual, expected);
+	});
+
 	test("test is", () => {
 		const cst = CstNode.parseJSON([
 			"node",

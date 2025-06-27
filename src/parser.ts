@@ -77,7 +77,17 @@ export class CstBuilder {
 	}
 
 	start(type: string, attrs?: Omit<CstAttrs, "type">) {
-		const elem = new CstNode("node", attrs ? { ...attrs, type } : { type });
+		const props: Record<string, any> = { type };
+		if (attrs) {
+			for (const key of Object.keys(attrs)) {
+				const value = attrs[key];
+				if (value !== undefined) {
+					props[key] = value;
+				}
+			}
+		}
+
+		const elem = new CstNode("node", props);
 		if (this.current === EMPTY_NODE) {
 			this.root = elem;
 		} else {
@@ -106,7 +116,15 @@ export class CstBuilder {
 	}
 
 	meta(attrs: CstAttrs, context?: CstNode) {
-		const meta = new CstNode("meta", attrs);
+		const props: Record<string, any> = {};
+		for (const key of Object.keys(attrs)) {
+			const value = attrs[key];
+			if (value !== undefined) {
+				props[key] = value;
+			}
+		}
+
+		const meta = new CstNode("meta", props);
 		if (this.options.meta) {
 			const current = context ?? this.current;
 			current.append(meta);

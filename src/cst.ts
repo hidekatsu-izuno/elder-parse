@@ -3,7 +3,6 @@ import { is, selectAll, selectOne } from "css-select";
 import { escapeXml } from "./utils.ts";
 
 export type CstAttrs = {
-	type: string;
 	[name: string]: string | number | boolean | undefined;
 };
 
@@ -153,19 +152,16 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 				? JSON.parse(source, (key, value) => {
 						if (value?.constructor === Object) {
 							return Object.keys(value).reduce((obj: any, key: string) => {
-								const type = value[key];
-								if (key === "type") {
-									if (type === "string") {
-										obj[key] = value[key];
-									} else {
-										obj[key] = "";
-									}
+								const type = key === "type" ? "string" : typeof value[key];
+								if (type === "string") {
+									obj[key] = value[key] ?? "";
 								} else if (
-									type === "string" ||
 									type === "number" ||
 									type === "boolean"
 								) {
 									obj[key] = value[key];
+								} else {
+									obj[key] = undefined;
 								}
 								return obj;
 							}, {});
@@ -175,28 +171,43 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 				: source;
 
 		function traverse(current: Array<unknown>) {
-			if (current.length < 2 || typeof current[0] !== "string") {
-				throw new SyntaxError();
-			}
-
-			if (
-				current.length >= 2 &&
-				typeof current[0] === "string" &&
-				current[1]?.constructor === Object &&
-				typeof (current[1] as Record<string, any>)?.type === "string"
-			) {
-				Object.setPrototypeOf(current, CstNode.prototype);
-				for (let i = 2; i < current.length; i++) {
-					const child = current[i];
-					if (Array.isArray(child) && typeof child[0] === "string") {
-						traverse(child);
-						child[1][KEY_PARENT] = current;
-					} else if (typeof child !== "string") {
-						throw new SyntaxError();
-					}
+			if (current[0] === "node" || current[0] === "token") {
+				if (current.length < 2) {
+					throw new SyntaxError();
+				}
+			} else if (current[0] === "meta") {
+				if (current.length !== 2) {
+					throw new SyntaxError();
 				}
 			} else {
 				throw new SyntaxError();
+			}
+
+			if (current[1]?.constructor !== Object) {
+				throw new SyntaxError();
+			}
+
+			const attrs = current[1] as Record<string, any>;
+			if (current[0] === "node" || current[0] === "token") {
+				if (typeof attrs?.type !== "string") {
+					throw new SyntaxError();
+				}
+			}
+			for (const value of Object.values(attrs)) {
+				if (typeof value !== "string" && typeof value !== "number" && typeof value !== "boolean") {
+					throw new SyntaxError(`'${value}' must be string, number or boolean.`);
+				}
+			}
+
+			Object.setPrototypeOf(current, CstNode.prototype);
+			for (let i = 2; i < current.length; i++) {
+				const child = current[i];
+				if (Array.isArray(child) && typeof child[0] === "string") {
+					traverse(child);
+					child[1][KEY_PARENT] = current;
+				} else if (typeof child !== "string") {
+					throw new SyntaxError();
+				}
 			}
 		}
 
@@ -306,13 +317,29 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 			for (let i = 0; i < indent; i++) {
 				out += "\t";
 			}
-			out += `[${JSON.stringify(elem[0])}, { "type": ${JSON.stringify(elem[1].type)}`;
-			for (const key of Object.keys(elem[1]).sort()) {
-				if (key !== "type") {
-					out += `, ${JSON.stringify(key)}: ${JSON.stringify(elem[1][key])}`;
+			out += `[${JSON.stringify(elem[0])}, {`;
+			let first = true;
+			for (const key of Object.keys(elem[1]).sort((a, b) => {
+				if (a === "type") {
+					return b !== "type" ? 1 : 0;
+				} else if (b === "type") {
+					return -1;
+				} else {
+					return a > b ? 1 : a < b ? -1 : 0;
 				}
+			})) {
+				if (first) {
+					out += " ";
+					first = false;
+				} else {
+					out += ", ";
+				}
+				out += `${JSON.stringify(key)}: ${JSON.stringify(elem[1][key])}`;
 			}
-			out += " }";
+			if (!first) {
+				out += " ";
+			}
+			out += "}";
 			if (elem.length > 2) {
 				for (let i = 2; i < elem.length; i++) {
 					const child = elem[i];
@@ -351,12 +378,18 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 			for (let i = 0; i < indent; i++) {
 				out += "\t";
 			}
-			out += `<${escapeXml(elem[0])} type="${escapeXml(elem[1].type)}"`;
-			for (const key of Object.keys(elem[1]).sort()) {
-				if (key !== "type") {
-					const value = elem[1][key];
-					out += ` ${escapeXml(key)}="${escapeXml(value != null ? value.toString() : "")}"`;
+			out += `<${escapeXml(elem[0])}`;
+			for (const key of Object.keys(elem[1]).sort((a, b) => {
+				if (a === "type") {
+					return b !== "type" ? 1 : 0;
+				} else if (b === "type") {
+					return -1;
+				} else {
+					return a > b ? 1 : a < b ? -1 : 0;
 				}
+			})) {
+				const value = elem[1][key];
+				out += ` ${escapeXml(key)}="${escapeXml(value != null ? value.toString() : "")}"`;
 			}
 			if (elem.length > 2) {
 				out += ">";
