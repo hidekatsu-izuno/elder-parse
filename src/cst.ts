@@ -155,10 +155,7 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 								const type = key === "type" ? "string" : typeof value[key];
 								if (type === "string") {
 									obj[key] = value[key] ?? "";
-								} else if (
-									type === "number" ||
-									type === "boolean"
-								) {
+								} else if (type === "number" || type === "boolean") {
 									obj[key] = value[key];
 								} else {
 									obj[key] = undefined;
@@ -194,8 +191,14 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 				}
 			}
 			for (const value of Object.values(attrs)) {
-				if (typeof value !== "string" && typeof value !== "number" && typeof value !== "boolean") {
-					throw new SyntaxError(`'${value}' must be string, number or boolean.`);
+				if (
+					typeof value !== "string" &&
+					typeof value !== "number" &&
+					typeof value !== "boolean"
+				) {
+					throw new SyntaxError(
+						`'${value}' must be string, number or boolean.`,
+					);
 				}
 			}
 

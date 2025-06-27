@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { suite, test } from "node:test";
 import { CstNode } from "../src/cst.ts";
+import { Token, TokenType } from "../src/lexer.ts";
 import { CstBuilder } from "../src/parser.ts";
-import { Token, TokenType } from "../src/lexer.ts"
 
 suite("test cst", () => {
 	test("test parse", () => {
@@ -30,10 +30,10 @@ suite("test cst", () => {
 
 				builder.start("100", { value: 100 });
 				builder.end();
-				
+
 				builder.start("true", { value: true });
 				builder.end();
-								
+
 				builder.start("undefined", { value: undefined });
 				builder.end();
 			}
