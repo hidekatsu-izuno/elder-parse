@@ -324,9 +324,9 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 			let first = true;
 			for (const key of Object.keys(elem[1]).sort((a, b) => {
 				if (a === "type") {
-					return b !== "type" ? 1 : 0;
+					return b !== "type" ? -1 : 0;
 				} else if (b === "type") {
-					return -1;
+					return 1;
 				} else {
 					return a > b ? 1 : a < b ? -1 : 0;
 				}
@@ -384,9 +384,9 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 			out += `<${escapeXml(elem[0])}`;
 			for (const key of Object.keys(elem[1]).sort((a, b) => {
 				if (a === "type") {
-					return b !== "type" ? 1 : 0;
+					return b !== "type" ? -1 : 0;
 				} else if (b === "type") {
-					return -1;
+					return 1;
 				} else {
 					return a > b ? 1 : a < b ? -1 : 0;
 				}
