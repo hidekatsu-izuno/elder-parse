@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.3.9](https://github.com/hidekatsu-izuno/elder-parse/compare/v0.3.8...v0.3.9) (2025-07-01)
+
+
+### Features
+
+* add selectParent method to CstNode class for parent selection ([8d587ba](https://github.com/hidekatsu-izuno/elder-parse/commit/8d587ba221d9e3bb0d161cc4e2900c568c2cdfbf))
+
+
+### Bug Fixes
+
+* correct sorting logic for 'type' attribute in CstNode class ([34b6557](https://github.com/hidekatsu-izuno/elder-parse/commit/34b65573ac01718a27b6a534449fd351febbf505))
+* improve formatting of toJSONString assertion in cst.test.ts ([06f05df](https://github.com/hidekatsu-izuno/elder-parse/commit/06f05dfa8067a0aae4b2e5fb7485a6e36384dc96))
+
 ## [0.3.8](https://github.com/hidekatsu-izuno/elder-parse/compare/v0.3.7...v0.3.8) (2025-06-27)
 
 
