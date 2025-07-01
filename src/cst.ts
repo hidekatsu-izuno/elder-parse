@@ -292,6 +292,16 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 		);
 	}
 
+	selectParent(selector: string): CstNode | undefined {
+		let current = this.parent;
+		while (current) {
+			if (current.is(selector)) {
+				return current;
+			}
+			current = current.parent;
+		}
+	}
+
 	selectOne(selector: string): CstNode | undefined {
 		return (
 			selectOne<CstNode, CstNode>(

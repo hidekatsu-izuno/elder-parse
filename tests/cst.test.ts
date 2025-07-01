@@ -66,7 +66,7 @@ suite("test cst", () => {
 		assert.equal(cst.is(":has(> [type=b] > [type=ba])"), true);
 	});
 
-	test("test selectOne/selectAll", () => {
+	test("test selectOne/selectParent/selectAll", () => {
 		const cst = CstNode.parseJSON([
 			"node",
 			{ type: "a" },
@@ -104,7 +104,6 @@ suite("test cst", () => {
 				?.selectOne(":scope > [type=ba]"),
 			(cst.children[2] as CstNode).children[1],
 		);
-
 		assert.deepEqual(cst.selectAll("> [type=b]"), [
 			cst.children[1],
 			cst.children[2],
@@ -114,6 +113,7 @@ suite("test cst", () => {
 			cst.children[2],
 			(cst.children[2] as CstNode).children[0],
 		]);
+		assert.equal(cst.selectOne("[type=ba]")?.selectParent("[type=a]"), cst);
 	});
 
 	test("test remove", () => {
