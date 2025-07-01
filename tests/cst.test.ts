@@ -139,6 +139,9 @@ suite("test cst", () => {
 			"node",
 			{ type: "a", value: "b", alpha: "c" },
 		]);
-		assert.equal(cst.toJSONString(), '["node", { "type": "a", "alpha": "c", "value": "b" }]');
+		assert.equal(
+			cst.toJSONString(),
+			'["node", { "type": "a", "alpha": "c", "value": "b" }]',
+		);
 	});
 });
