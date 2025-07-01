@@ -133,4 +133,12 @@ suite("test cst", () => {
 		cst.remove(nodeB);
 		assert.equal(cst.selectOne("> [type=b]"), undefined);
 	});
+
+	test("test toJSONString", () => {
+		const cst = CstNode.parseJSON([
+			"node",
+			{ type: "a", value: "b", alpha: "c" },
+		]);
+		assert.equal(cst.toJSONString(), '["node", { "type": "a", "alpha": "c", "value": "b" }]');
+	});
 });
