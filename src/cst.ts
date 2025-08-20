@@ -237,6 +237,10 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 		this[1] = attrs;
 		for (let i = 0; i < childNodes.length; i++) {
 			this[i + 2] = childNodes[i];
+			if (this[i + 2] instanceof CstNode) {
+				const attrs = this[i + 2][1] as { [KEY_PARENT]?: CstNode };
+				attrs[KEY_PARENT] = this;
+			}
 		}
 	}
 
