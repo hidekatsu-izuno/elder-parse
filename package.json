@@ -55,12 +55,12 @@
 		"./package.json": "./package.json"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.0.5",
-		"@types/node": "^24.0.3",
-		"commit-and-tag-version": "^12.5.1",
-		"typescript": "^5.8.3"
+		"@biomejs/biome": "2.2.0",
+		"@types/node": "^24.3.0",
+		"commit-and-tag-version": "^12.5.2",
+		"typescript": "^5.9.2"
 	},
 	"dependencies": {
-		"css-select": "^5.1.0"
+		"css-select": "^6.0.0"
 	}
 }
