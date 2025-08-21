@@ -545,12 +545,16 @@ export class TokenReader {
 				}
 				line += text;
 			}
-			line = line.split(/\r?\n/g)
-				.map((line, index, array) => `${
-					index + 1 === array.length ? "> " : "  "
-				}${
-					`${lineNumber - (array.length - index - 1)}`.padStart(`${lineNumber}`.length)
-				} |${line}`)
+			line = line
+				.split(/\r?\n/g)
+				.map(
+					(line, index, array) =>
+						`${
+							index + 1 === array.length ? "> " : "  "
+						}${`${lineNumber - (array.length - index - 1)}`.padStart(
+							`${lineNumber}`.length,
+						)} |${line}`,
+				)
 				.join("\u21B5\n");
 			message = `Unexpected token: ${token.text}\n${line}`;
 		}
