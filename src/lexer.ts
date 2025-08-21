@@ -477,53 +477,89 @@ export class TokenReader {
 		const token = this.peek();
 		const source = token?.location?.source;
 		let lineNumber = token?.location?.lineNumber;
-		const columnNumber = token?.location?.columnNumber;
+		let columnNumber = token?.location?.columnNumber;
 		let message = options.message;
-
-		if (message == null) {
-			const end = Math.min(this.pos, this.tokens.length - 1);
-			let start = end;
-			while (start >= 0) {
-				const text = this.tokens[start].toString();
-				const linebreak = text.indexOf("\n");
-				if (start === 0) {
-					break;
-				} else if (linebreak !== -1) {
-					if (end - start > 3) {
-						break;
-					}
-				}
-				start--;
-			}
-			let line = "";
-			for (let i = start; i <= end; i++) {
-				const text = this.tokens[i].toString();
-				if (i === start) {
-					line += text.replace(/^.*\n/, "");
-				} else {
-					line += text;
-				}
-			}
-			message = `Unexpected token: ${token.text}\n${line.replace(/\r?\n/g, "\u21B5\n")}\u261C`;
-		}
 
 		if (lineNumber == null) {
 			lineNumber = 1;
 			for (let i = 0; i < this.pos; i++) {
-				const token = this.tokens[i];
-				lineNumber += token.text.match(/\r?\n/g)?.length || 0;
+				const text = this.tokens[i].toString();
+				lineNumber += text.match(/\r?\n/g)?.length || 0;
 			}
+		}
+		if (columnNumber == null) {
+			columnNumber = 1;
+			for (let i = this.pos - 1; i >= 0; i--) {
+				const text = this.tokens[i].toString();
+				const index = text.indexOf("\n");
+				if (index !== -1) {
+					columnNumber += text.length - index;
+					break;
+				}
+				columnNumber += text.length;
+			}
+		}
+
+		if (message == null) {
+			const current = Math.min(this.pos, this.tokens.length - 1);
+			let start = current;
+			let count = 0;
+			while (start > 0) {
+				const text = this.tokens[start].toString();
+				if (text.indexOf("\n") !== -1) {
+					if (count > 1) {
+						break;
+					}
+					count++;
+				}
+				start--;
+			}
+			let end = current;
+			while (end < this.tokens.length) {
+				const text = this.tokens[end].toString();
+				if (text.indexOf("\n") !== -1) {
+					break;
+				}
+				end++;
+			}
+			end = Math.min(end, this.tokens.length - 1);
+
+			let line = "";
+			for (let i = start; i <= end; i++) {
+				let text = "";
+				if (i === current) {
+					for (const skip of this.tokens[i].preskips) {
+						text += skip.text;
+					}
+					text += `“${this.tokens[i].text}”`;
+					for (const skip of this.tokens[i].postskips) {
+						text += skip.text;
+					}
+				} else {
+					text = this.tokens[i].toString();
+					if (i === start) {
+						text = text.replace(/^.*\n/, "");
+					} else if (i === end) {
+						text = text.replace(/\n.*$/s, "");
+					}
+				}
+				line += text;
+			}
+			line = line.split(/\r?\n/g)
+				.map((line, index, array) => `${
+					index + 1 === array.length ? "> " : "  "
+				}${
+					`${lineNumber - (array.length - index - 1)}`.padStart(`${lineNumber}`.length)
+				} |${line}`)
+				.join("\u21B5\n");
+			message = `Unexpected token: ${token.text}\n${line}`;
 		}
 
 		let prefix = "";
 		if (source != null) {
 			prefix += source;
 		}
-		prefix += `[${lineNumber}`;
-		if (columnNumber != null) {
-			prefix += `,${columnNumber}`;
-		}
-		prefix += "] ";
+		prefix += `[${lineNumber},${columnNumber}] `;
 
 		const err = new ParseError(prefix + message);
 		err.source = source;
@@ -537,4 +573,9 @@ export class ParseError extends Error {
 	source?: string;
 	lineNumber?: number;
 	columnNumber?: number;
+
+	constructor(message: string) {
+		super(message);
+		this.name = "ParseError";
+	}
 }

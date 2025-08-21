@@ -9,6 +9,7 @@ import {
 	TokenType,
 } from "../src/lexer.ts";
 import { type CstBuilder, Parser, type ParserOptions } from "../src/parser.ts";
+import { fail } from "node:assert"
 
 class TestLexer extends Lexer {
 	static Start = new TokenType("Start", { marker: true });
@@ -326,5 +327,31 @@ suite("test lexer and parser", () => {
 				],
 			]).toJSONString(),
 		);
+	});
+
+	test("test parser error", () => {
+		const parser = new TestParser({
+			location: false,
+			marker: false,
+		});
+		try {
+			parser.parse("CALC\n ((1 +3.1*2) / 4) MO 2");
+			fail();
+		} catch (err) {
+			assert.equal(err.message, 
+				"[2,19] Unexpected token: MO\n" +
+				"  1 |CALC↵\n" + 
+				"> 2 | ((1 +3.1*2) / 4) “MO” 2");
+		}
+		try {
+			parser.parse("CALC\n ((1\n +3.1\n*2) / \n4) MO 2");
+			fail();
+		} catch (err) {
+			assert.equal(err.message, 
+				"[5,4] Unexpected token: MO\n" +
+				"  3 | +3.1↵\n" +
+				"  4 |*2) / ↵\n" +
+				"> 5 |4) “MO” 2");
+		}
 	});
 });
