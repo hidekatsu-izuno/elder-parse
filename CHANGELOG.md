@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.4.0](https://github.com/hidekatsu-izuno/elder-parse/compare/v0.3.11...v0.4.0) (2025-09-10)
+
+
+### Features
+
+* add textAll method to CstNode for collecting all text values ([83f77d9](https://github.com/hidekatsu-izuno/elder-parse/commit/83f77d95a081bfa0b61c4a61b240806c426c1b01))
+* enhance Token class to support subtokens and improve toString method ([2292479](https://github.com/hidekatsu-izuno/elder-parse/commit/2292479c3e9509dfe3fd6e2f2702a23dbb8376f4))
+
 ## [0.3.11](https://github.com/hidekatsu-izuno/elder-parse/compare/v0.3.10...v0.3.11) (2025-08-21)
 
 ## [0.3.10](https://github.com/hidekatsu-izuno/elder-parse/compare/v0.3.9...v0.3.10) (2025-08-20)
