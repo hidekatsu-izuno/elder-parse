@@ -124,12 +124,13 @@ export class Token {
 	text: string;
 	keyword?: Keyword;
 	preskips: Token[];
+	subtokens?: Token[];
 	postskips: Token[];
 	location?: SourceLocation;
 
 	constructor(
 		type: TokenType,
-		text: string,
+		text: string | Token[],
 		options?: {
 			keyword?: Keyword;
 			preskips?: Token[];
@@ -138,7 +139,12 @@ export class Token {
 		},
 	) {
 		this.type = type;
-		this.text = text;
+		if (Array.isArray(text)) {
+			this.subtokens = text;
+			this.text = text.map((token) => token.text).join("");
+		} else {
+			this.text = text;
+		}
 		this.keyword = options?.keyword;
 		this.preskips = options?.preskips ?? [];
 		this.postskips = options?.postskips ?? [];
@@ -178,14 +184,24 @@ export class Token {
 	}
 
 	toString() {
-		if (this.preskips.length > 0 || this.postskips.length > 0) {
+		if (
+			this.preskips.length > 0 ||
+			this.subtokens ||
+			this.postskips.length > 0
+		) {
 			let out = "";
-			for (let i = 0; i < this.preskips.length; i++) {
-				out += this.preskips[i].text;
+			for (const skip of this.preskips) {
+				out += skip.toString();
 			}
-			out += this.text;
-			for (let i = 0; i < this.postskips.length; i++) {
-				out += this.postskips[i].text;
+			if (this.subtokens) {
+				for (const subtoken of this.subtokens) {
+					out += subtoken.toString();
+				}
+			} else {
+				out += this.text;
+			}
+			for (const skip of this.postskips) {
+				out += skip.toString();
 			}
 			return out;
 		}
