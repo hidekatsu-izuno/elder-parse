@@ -325,7 +325,19 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 	}
 
 	text() {
-		return this.toPlainString();
+		let out = "";
+		function print(elem: CstNode, indent: number) {
+			for (let i = 2; i < elem.length; i++) {
+				const child = elem[i];
+				if (Array.isArray(child)) {
+					print(child, indent + 1);
+				} else {
+					out += child.toString();
+				}
+			}
+		}
+		print(this, 0);
+		return out;
 	}
 
 	textAll() {
@@ -450,22 +462,6 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 				out += `</${escapeXml(elem[0])}>`;
 			} else {
 				out += ` />`;
-			}
-		}
-		print(this, 0);
-		return out;
-	}
-
-	toPlainString() {
-		let out = "";
-		function print(elem: CstNode, indent: number) {
-			for (let i = 2; i < elem.length; i++) {
-				const child = elem[i];
-				if (Array.isArray(child)) {
-					print(child, indent + 1);
-				} else {
-					out += child.toString();
-				}
 			}
 		}
 		print(this, 0);
