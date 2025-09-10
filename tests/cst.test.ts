@@ -134,6 +134,16 @@ suite("test cst", () => {
 		assert.equal(cst.selectOne("> [type=b]"), undefined);
 	});
 
+	test("test textAll", () => {
+		const cst = CstNode.parseJSON([
+			"node",
+			{ type: "a" },
+			["token", { type: "b" }, "xxx"],
+			["token", { type: "b" }, "yyy"],
+		]);
+		assert.deepEqual(cst.textAll(), ["xxx", "yyy"]);
+	});
+
 	test("test toJSONString", () => {
 		const cst = CstNode.parseJSON([
 			"node",

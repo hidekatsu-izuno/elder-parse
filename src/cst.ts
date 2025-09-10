@@ -328,6 +328,22 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 		return this.toPlainString();
 	}
 
+	textAll() {
+		const array: string[] = [];
+		function collect(elem: CstNode) {
+			for (let i = 2; i < elem.length; i++) {
+				const child = elem[i];
+				if (Array.isArray(child)) {
+					collect(child);
+				} else if (typeof child === "string") {
+					array.push(child);
+				}
+			}
+		}
+		collect(this);
+		return array;
+	}
+
 	toJSONString() {
 		let out = "";
 		function print(elem: CstNode, indent: number) {

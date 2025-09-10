@@ -10,8 +10,8 @@ export class TokenType {
 	constructor(
 		name: string,
 		options?: {
-			skip?: boolean,
-			separator?: boolean,
+			skip?: boolean;
+			separator?: boolean;
 		},
 	) {
 		this.name = name;
