@@ -11,7 +11,7 @@ import {
 import { type CstBuilder, Parser, type ParserOptions } from "../src/parser.ts";
 
 class TestLexer extends Lexer {
-	static Start = new TokenType("Start", { marker: true });
+	static Start = new TokenType("Start");
 	static Space = new TokenType("Space", { skip: true });
 	static Identifier = new TokenType("Identifier");
 	static Numeric = new TokenType("Numeric");
@@ -209,7 +209,7 @@ suite("test lexer and parser", () => {
 		const parser = new TestParser({
 			skipTokenStrategy: "ignore",
 			location: false,
-			marker: false,
+			empty: false,
 		});
 		const root = parser.parse("CALC ((1 +3.1*2) / 4) MOD 2");
 
@@ -331,7 +331,7 @@ suite("test lexer and parser", () => {
 	test("test parser error", () => {
 		const parser = new TestParser({
 			location: false,
-			marker: false,
+			empty: false,
 		});
 		try {
 			parser.parse("CALC\n ((1 +3.1*2) / 4) MO 2");

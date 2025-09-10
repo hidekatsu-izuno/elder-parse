@@ -51,7 +51,7 @@ export declare type CstBuilderOptions = {
 	meta?: boolean;
 	token?: boolean;
 	trivia?: boolean;
-	marker?: boolean;
+	empty?: boolean;
 };
 
 const EMPTY_NODE = new CstNode("node", { type: "" });
@@ -62,7 +62,7 @@ export class CstBuilder {
 		meta: boolean;
 		token: boolean;
 		trivia: boolean;
-		marker: boolean;
+		empty: boolean;
 	};
 
 	constructor(options: CstBuilderOptions = {}) {
@@ -72,7 +72,7 @@ export class CstBuilder {
 			meta: options.meta ?? true,
 			token: options.token ?? true,
 			trivia: options.trivia ?? true,
-			marker: options.marker ?? true,
+			empty: options.empty ?? true,
 		};
 	}
 
@@ -155,7 +155,7 @@ export class CstBuilder {
 				elem.append(trivia);
 			}
 		}
-		if (this.options.token && (!token.type.marker || this.options.marker)) {
+		if (this.options.token && (token.text || this.options.empty)) {
 			const current = context ?? this.current;
 			current.append(elem);
 		}

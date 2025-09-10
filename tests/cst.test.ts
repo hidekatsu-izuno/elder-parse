@@ -41,7 +41,7 @@ suite("test cst", () => {
 			builder.meta({ extra: "c" });
 		}
 		const expected = builder.end();
-		assert.deepEqual(actual, expected);
+		assert.deepEqual(actual.toXMLString(), expected.toXMLString());
 	});
 
 	test("test is", () => {

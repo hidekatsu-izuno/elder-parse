@@ -9,7 +9,7 @@ export type CstAttrs = {
 export type CstPrintOptions = {
 	token?: boolean;
 	trivia?: boolean;
-	marker?: boolean;
+	empty?: boolean;
 };
 
 const KEY_PARENT = Symbol.for("parent");

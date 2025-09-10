@@ -2,7 +2,6 @@ export class TokenType {
 	name: string;
 	skip: boolean;
 	separator: boolean;
-	marker: boolean;
 
 	private hasKeyword = false;
 	private map: Record<string, Keyword> = {};
@@ -11,15 +10,13 @@ export class TokenType {
 	constructor(
 		name: string,
 		options?: {
-			skip?: boolean;
-			separator?: boolean;
-			marker?: boolean;
+			skip?: boolean,
+			separator?: boolean,
 		},
 	) {
 		this.name = name;
 		this.skip = options?.skip ?? false;
 		this.separator = options?.separator ?? false;
-		this.marker = options?.marker ?? false;
 	}
 
 	newKeyword(
@@ -213,7 +210,7 @@ export declare type LexerOptions = {
 
 export abstract class Lexer {
 	static Reserved = new TokenType("Reserved");
-	static EoF = new TokenType("EoF", { marker: true });
+	static EoF = new TokenType("EoF");
 	static Error = new TokenType("Error", { separator: true });
 
 	name: string;
