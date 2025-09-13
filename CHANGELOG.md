@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.4.1](https://github.com/hidekatsu-izuno/elder-parse/compare/v0.4.0...v0.4.1) (2025-09-13)
+
+
+### Features
+
+* enhance CstNode and Token classes to support subtokens and improve text handling ([5027e29](https://github.com/hidekatsu-izuno/elder-parse/commit/5027e29a38874426130da12f215b0dd08d88ac8c))
+* improve formatting in CstNode and CstBuilder for better readability and maintainability ([b94e285](https://github.com/hidekatsu-izuno/elder-parse/commit/b94e285c2ddc9d7ae227b7b764a29dfa182c4273))
+* update biome schema and dependencies to version 2.2.4 for improved compatibility ([323147f](https://github.com/hidekatsu-izuno/elder-parse/commit/323147f2a42615a130b1e5336e6de26d68d0f4c0))
+* update CstNode and CstBuilder to support 'chunk' type and enhance text handling in tests ([f2f282c](https://github.com/hidekatsu-izuno/elder-parse/commit/f2f282cfb160cfa15fb2b82682af2de63548f665))
+
 ## [0.4.0](https://github.com/hidekatsu-izuno/elder-parse/compare/v0.3.11...v0.4.0) (2025-09-10)
 
 
