@@ -42,6 +42,13 @@ suite("test cst", () => {
 		}
 		const expected = builder.end();
 		assert.deepEqual(actual.toXMLString(), expected.toXMLString());
+
+		try {
+			CstNode.parseJSON(["node", { "type": "a", "__proto__": "" }]);
+			assert.fail();
+		} catch (err: unknown) {
+			assert.ok(err);
+		}
 	});
 
 	test("test is", () => {

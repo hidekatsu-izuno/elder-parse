@@ -147,25 +147,27 @@ class CstNodeAdapter
 
 export class CstNode extends Array<CstAttrs | CstNode | string> {
 	static parseJSON(source: any): CstNode {
-		const node =
-			typeof source === "string"
-				? JSON.parse(source, (key, value) => {
-						if (value?.constructor === Object) {
-							return Object.keys(value).reduce((obj: any, key: string) => {
-								const type = key === "type" ? "string" : typeof value[key];
-								if (type === "string") {
-									obj[key] = value[key] ?? "";
-								} else if (type === "number" || type === "boolean") {
-									obj[key] = value[key];
-								} else {
-									obj[key] = undefined;
-								}
-								return obj;
-							}, {});
-						}
-						return value;
-					})
-				: source;
+		const text = typeof source === "string" ? source : JSON.stringify(source);
+		const node = JSON.parse(text, (key, value) => {
+			if (value?.constructor === Object) {
+				return Object.keys(value).reduce((obj: any, key: string) => {
+					if (key === "__proto__") {
+						throw new Error("Illegal property: __proto__");
+					}
+
+					const type = key === "type" ? "string" : typeof value[key];
+					if (type === "string") {
+						obj[key] = value[key] ?? "";
+					} else if (type === "number" || type === "boolean") {
+						obj[key] = value[key];
+					} else {
+						obj[key] = undefined;
+					}
+					return obj;
+				}, {});
+			}
+			return value;
+		});
 
 		function traverse(current: Array<unknown>) {
 			if (
