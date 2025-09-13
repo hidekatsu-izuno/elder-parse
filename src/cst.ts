@@ -168,7 +168,10 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 				: source;
 
 		function traverse(current: Array<unknown>) {
-			if (current[0] === "node" || current[0] === "token" || current[0] === "trivia") {
+			if (current[0] === "node" || 
+				current[0] === "token" || 
+				current[0] === "chunk" || 
+				current[0] === "trivia") {
 				if (current.length < 2) {
 					throw new SyntaxError();
 				}
@@ -185,7 +188,10 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 			}
 
 			const attrs = current[1] as Record<string, any>;
-			if (current[0] === "node" || current[0] === "token" || current[0] === "trivia") {
+			if (current[0] === "node" || 
+				current[0] === "token" || 
+				current[0] === "chunk" || 
+				current[0] === "trivia") {
 				if (typeof attrs?.type !== "string") {
 					throw new SyntaxError();
 				}
@@ -332,15 +338,13 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 				if (Array.isArray(child)) {
 					if (child[0] === "node") {
 						print(child, indent + 1);
+					} else if (child[0] === "chunk") {
+						out += child[1].text ?? "";
 					} else if (child[0] === "token") {
-						if (child[1].text) {
-							out += child[1].text;
-						} else {
-							for (let j = 2; j < child.length; j++) {
-								const child2 = child[j];
-								if (typeof child2 === "string") {
-									out += child2;
-								}
+						for (let j = 2; j < child.length; j++) {
+							const child2 = child[j];
+							if (typeof child2 === "string") {
+								out += child2;
 							}
 						}
 					}
@@ -359,15 +363,13 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 				if (Array.isArray(child)) {
 					if (child[0] === "node") {
 						collect(child);
+					} else if (child[0] === "chunk") {
+						array.push((child[1].text ?? "").toString());
 					} else if (child[0] === "token") {
-						if (child[1].text) {
-							array.push(child[1].text.toString());
-						} else {
-							for (let j = 2; j < child.length; j++) {
-								const child2 = child[j];
-								if (typeof child2 === "string") {
-									array.push(child2);
-								}
+						for (let j = 2; j < child.length; j++) {
+							const child2 = child[j];
+							if (typeof child2 === "string") {
+								array.push(child2);
 							}
 						}
 					}

@@ -150,17 +150,16 @@ suite("test cst", () => {
 		cst = CstNode.parseJSON([
 			"node",
 			{ type: "a" },
-			["token",
-				{ type: "b" },
-				["trivia", { type: "s"}, " "],
+			["chunk",
+				{ type: "b", text: "xxx" },
+				["trivia", { type: "s"}, "["],
 				["token", { type: "c" }, 
-					["trivia", { type: "s"}, " "],
+					["trivia", { type: "s"}, "<"],
 					"y",
-					["trivia", { type: "e"}, " "],
+					["trivia", { type: "e"}, ">"],
 				],
 				["token", { type: "c" }, "y"],
-				"xxx",
-				["trivia", { type: "e"}, " "],
+				["trivia", { type: "e"}, "]"],
 			],
 			["token", { type: "b" }, "yyy"],
 		]);
@@ -168,10 +167,32 @@ suite("test cst", () => {
 	});
 
 	test("test textAll", () => {
-		const cst = CstNode.parseJSON([
+		let cst = CstNode.parseJSON([
 			"node",
 			{ type: "a" },
-			["token", { type: "b" }, "xxx"],
+			["token", { type: "b" }, 
+				["trivia", { type: "s"}, " "],
+				"xxx",
+				["trivia", { type: "e"}, " "],
+			],
+			["token", { type: "b" }, "yyy"],
+		]);
+		assert.deepEqual(cst.textAll(), ["xxx", "yyy"]);
+
+		cst = CstNode.parseJSON([
+			"node",
+			{ type: "a" },
+			["chunk",
+				{ type: "b", text: "xxx" },
+				["trivia", { type: "s"}, "["],
+				["token", { type: "c" }, 
+					["trivia", { type: "s"}, "<"],
+					"y",
+					["trivia", { type: "e"}, ">"],
+				],
+				["token", { type: "c" }, "y"],
+				["trivia", { type: "e"}, "]"],
+			],
 			["token", { type: "b" }, "yyy"],
 		]);
 		assert.deepEqual(cst.textAll(), ["xxx", "yyy"]);
@@ -204,7 +225,7 @@ suite("test cst", () => {
 		cst = CstNode.parseJSON([
 			"node",
 			{ type: "a" },
-			["token",
+			["chunk",
 				{ type: "b", text: "xxx" },
 				["trivia", { type: "s"}, "["],
 				["token", { type: "c" }, 

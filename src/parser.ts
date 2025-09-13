@@ -133,7 +133,9 @@ export class CstBuilder {
 	}
 
 	token(token: Token, context?: CstNode) {
-		const elem = new CstNode("token", { type: token.type.name });
+		const elem = token.subtokens ? 
+			new CstNode("chunk", { type: token.type.name, text: token.text }) :
+			new CstNode("token", { type: token.type.name });
 		if (this.options.trivia) {
 			for (const skip of token.preskips) {
 				const trivia = new CstNode("trivia", { type: skip.type.name });
@@ -147,8 +149,7 @@ export class CstBuilder {
 			for (const subtoken of token.subtokens) {
 				this.token(subtoken, elem);
 			}
-		}
-		if (token.text) {
+		} else if (token.text) {
 			elem.append(token.text);
 		}
 		if (this.options.trivia) {
