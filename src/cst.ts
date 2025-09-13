@@ -384,6 +384,10 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 		return array;
 	}
 
+	clone() {
+		return CstNode.parseJSON(this.toJSONString());
+	}
+
 	toJSONString() {
 		let out = "";
 		function print(elem: CstNode, indent: number) {
@@ -416,7 +420,7 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 			if (elem.length > 2) {
 				for (let i = 2; i < elem.length; i++) {
 					const child = elem[i];
-					if (Array.isArray(child)) {
+					if (child instanceof CstNode) {
 						out += ",\n";
 						print(child, indent + 1);
 					} else {
@@ -468,7 +472,7 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 				out += ">";
 				for (let i = 2; i < elem.length; i++) {
 					const child = elem[i];
-					if (Array.isArray(child)) {
+					if (child instanceof CstNode) {
 						out += "\n";
 						print(child, indent + 1);
 					} else {
@@ -501,7 +505,7 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 		function print(elem: CstNode, indent: number) {
 			for (let i = 2; i < elem.length; i++) {
 				const child = elem[i];
-				if (Array.isArray(child)) {
+				if (child instanceof CstNode) {
 					print(child, indent + 1);
 				} else {
 					out += child.toString();
