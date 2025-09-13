@@ -138,10 +138,12 @@ suite("test cst", () => {
 		let cst = CstNode.parseJSON([
 			"node",
 			{ type: "a" },
-			["token", { type: "b" }, 
-				["trivia", { type: "s"}, " "],
+			[
+				"token",
+				{ type: "b" },
+				["trivia", { type: "s" }, " "],
 				"xxx",
-				["trivia", { type: "e"}, " "],
+				["trivia", { type: "e" }, " "],
 			],
 			["token", { type: "b" }, "yyy"],
 		]);
@@ -150,16 +152,19 @@ suite("test cst", () => {
 		cst = CstNode.parseJSON([
 			"node",
 			{ type: "a" },
-			["chunk",
+			[
+				"chunk",
 				{ type: "b", text: "xxx" },
-				["trivia", { type: "s"}, "["],
-				["token", { type: "c" }, 
-					["trivia", { type: "s"}, "<"],
+				["trivia", { type: "s" }, "["],
+				[
+					"token",
+					{ type: "c" },
+					["trivia", { type: "s" }, "<"],
 					"y",
-					["trivia", { type: "e"}, ">"],
+					["trivia", { type: "e" }, ">"],
 				],
 				["token", { type: "c" }, "y"],
-				["trivia", { type: "e"}, "]"],
+				["trivia", { type: "e" }, "]"],
 			],
 			["token", { type: "b" }, "yyy"],
 		]);
@@ -170,10 +175,12 @@ suite("test cst", () => {
 		let cst = CstNode.parseJSON([
 			"node",
 			{ type: "a" },
-			["token", { type: "b" }, 
-				["trivia", { type: "s"}, " "],
+			[
+				"token",
+				{ type: "b" },
+				["trivia", { type: "s" }, " "],
 				"xxx",
-				["trivia", { type: "e"}, " "],
+				["trivia", { type: "e" }, " "],
 			],
 			["token", { type: "b" }, "yyy"],
 		]);
@@ -182,16 +189,19 @@ suite("test cst", () => {
 		cst = CstNode.parseJSON([
 			"node",
 			{ type: "a" },
-			["chunk",
+			[
+				"chunk",
 				{ type: "b", text: "xxx" },
-				["trivia", { type: "s"}, "["],
-				["token", { type: "c" }, 
-					["trivia", { type: "s"}, "<"],
+				["trivia", { type: "s" }, "["],
+				[
+					"token",
+					{ type: "c" },
+					["trivia", { type: "s" }, "<"],
 					"y",
-					["trivia", { type: "e"}, ">"],
+					["trivia", { type: "e" }, ">"],
 				],
 				["token", { type: "c" }, "y"],
-				["trivia", { type: "e"}, "]"],
+				["trivia", { type: "e" }, "]"],
 			],
 			["token", { type: "b" }, "yyy"],
 		]);
@@ -213,10 +223,12 @@ suite("test cst", () => {
 		let cst = CstNode.parseJSON([
 			"node",
 			{ type: "a" },
-			["token", { type: "b" }, 
-				["trivia", { type: "s"}, "["],
+			[
+				"token",
+				{ type: "b" },
+				["trivia", { type: "s" }, "["],
 				"xxx",
-				["trivia", { type: "e"}, "]"],
+				["trivia", { type: "e" }, "]"],
 			],
 			["token", { type: "b" }, "yyy"],
 		]);
@@ -225,16 +237,19 @@ suite("test cst", () => {
 		cst = CstNode.parseJSON([
 			"node",
 			{ type: "a" },
-			["chunk",
+			[
+				"chunk",
 				{ type: "b", text: "xxx" },
-				["trivia", { type: "s"}, "["],
-				["token", { type: "c" }, 
-					["trivia", { type: "s"}, "<"],
+				["trivia", { type: "s" }, "["],
+				[
+					"token",
+					{ type: "c" },
+					["trivia", { type: "s" }, "<"],
 					"y",
-					["trivia", { type: "e"}, ">"],
+					["trivia", { type: "e" }, ">"],
 				],
 				["token", { type: "c" }, "y"],
-				["trivia", { type: "e"}, "]"],
+				["trivia", { type: "e" }, "]"],
 			],
 			["token", { type: "b" }, "yyy"],
 		]);

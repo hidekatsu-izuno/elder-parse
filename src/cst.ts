@@ -168,10 +168,12 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 				: source;
 
 		function traverse(current: Array<unknown>) {
-			if (current[0] === "node" || 
-				current[0] === "token" || 
-				current[0] === "chunk" || 
-				current[0] === "trivia") {
+			if (
+				current[0] === "node" ||
+				current[0] === "token" ||
+				current[0] === "chunk" ||
+				current[0] === "trivia"
+			) {
 				if (current.length < 2) {
 					throw new SyntaxError();
 				}
@@ -188,10 +190,12 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 			}
 
 			const attrs = current[1] as Record<string, any>;
-			if (current[0] === "node" || 
-				current[0] === "token" || 
-				current[0] === "chunk" || 
-				current[0] === "trivia") {
+			if (
+				current[0] === "node" ||
+				current[0] === "token" ||
+				current[0] === "chunk" ||
+				current[0] === "trivia"
+			) {
 				if (typeof attrs?.type !== "string") {
 					throw new SyntaxError();
 				}
