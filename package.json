@@ -55,9 +55,9 @@
 		"./package.json": "./package.json"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.2.0",
-		"@types/node": "^24.3.0",
-		"commit-and-tag-version": "^12.5.2",
+		"@biomejs/biome": "2.2.4",
+		"@types/node": "^24.3.3",
+		"commit-and-tag-version": "^12.6.0",
 		"typescript": "^5.9.2"
 	},
 	"dependencies": {
