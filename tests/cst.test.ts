@@ -134,6 +134,39 @@ suite("test cst", () => {
 		assert.equal(cst.selectOne("> [type=b]"), undefined);
 	});
 
+	test("test text", () => {
+		let cst = CstNode.parseJSON([
+			"node",
+			{ type: "a" },
+			["token", { type: "b" }, 
+				["trivia", { type: "s"}, " "],
+				"xxx",
+				["trivia", { type: "e"}, " "],
+			],
+			["token", { type: "b" }, "yyy"],
+		]);
+		assert.deepEqual(cst.text(), "xxxyyy");
+
+		cst = CstNode.parseJSON([
+			"node",
+			{ type: "a" },
+			["token",
+				{ type: "b" },
+				["trivia", { type: "s"}, " "],
+				["token", { type: "c" }, 
+					["trivia", { type: "s"}, " "],
+					"y",
+					["trivia", { type: "e"}, " "],
+				],
+				["token", { type: "c" }, "y"],
+				"xxx",
+				["trivia", { type: "e"}, " "],
+			],
+			["token", { type: "b" }, "yyy"],
+		]);
+		assert.deepEqual(cst.text(), "xxxyyy");
+	});
+
 	test("test textAll", () => {
 		const cst = CstNode.parseJSON([
 			"node",
@@ -153,5 +186,37 @@ suite("test cst", () => {
 			cst.toJSONString(),
 			'["node", { "type": "a", "alpha": "c", "value": "b" }]',
 		);
+	});
+
+	test("test toPlainString", () => {
+		let cst = CstNode.parseJSON([
+			"node",
+			{ type: "a" },
+			["token", { type: "b" }, 
+				["trivia", { type: "s"}, "["],
+				"xxx",
+				["trivia", { type: "e"}, "]"],
+			],
+			["token", { type: "b" }, "yyy"],
+		]);
+		assert.deepEqual(cst.toPlainString(), "[xxx]yyy");
+
+		cst = CstNode.parseJSON([
+			"node",
+			{ type: "a" },
+			["token",
+				{ type: "b", text: "xxx" },
+				["trivia", { type: "s"}, "["],
+				["token", { type: "c" }, 
+					["trivia", { type: "s"}, "<"],
+					"y",
+					["trivia", { type: "e"}, ">"],
+				],
+				["token", { type: "c" }, "y"],
+				["trivia", { type: "e"}, "]"],
+			],
+			["token", { type: "b" }, "yyy"],
+		]);
+		assert.deepEqual(cst.toPlainString(), "[<y>y]yyy");
 	});
 });

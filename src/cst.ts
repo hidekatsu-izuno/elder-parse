@@ -168,7 +168,7 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 				: source;
 
 		function traverse(current: Array<unknown>) {
-			if (current[0] === "node" || current[0] === "token") {
+			if (current[0] === "node" || current[0] === "token" || current[0] === "trivia") {
 				if (current.length < 2) {
 					throw new SyntaxError();
 				}
@@ -185,7 +185,7 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 			}
 
 			const attrs = current[1] as Record<string, any>;
-			if (current[0] === "node" || current[0] === "token") {
+			if (current[0] === "node" || current[0] === "token" || current[0] === "trivia") {
 				if (typeof attrs?.type !== "string") {
 					throw new SyntaxError();
 				}
@@ -330,9 +330,20 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 			for (let i = 2; i < elem.length; i++) {
 				const child = elem[i];
 				if (Array.isArray(child)) {
-					print(child, indent + 1);
-				} else {
-					out += child.toString();
+					if (child[0] === "node") {
+						print(child, indent + 1);
+					} else if (child[0] === "token") {
+						if (child[1].text) {
+							out += child[1].text;
+						} else {
+							for (let j = 2; j < child.length; j++) {
+								const child2 = child[j];
+								if (typeof child2 === "string") {
+									out += child2;
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -346,9 +357,20 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 			for (let i = 2; i < elem.length; i++) {
 				const child = elem[i];
 				if (Array.isArray(child)) {
-					collect(child);
-				} else if (typeof child === "string") {
-					array.push(child);
+					if (child[0] === "node") {
+						collect(child);
+					} else if (child[0] === "token") {
+						if (child[1].text) {
+							array.push(child[1].text.toString());
+						} else {
+							for (let j = 2; j < child.length; j++) {
+								const child2 = child[j];
+								if (typeof child2 === "string") {
+									array.push(child2);
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -462,6 +484,22 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 				out += `</${escapeXml(elem[0])}>`;
 			} else {
 				out += ` />`;
+			}
+		}
+		print(this, 0);
+		return out;
+	}
+
+	toPlainString() {
+		let out = "";
+		function print(elem: CstNode, indent: number) {
+			for (let i = 2; i < elem.length; i++) {
+				const child = elem[i];
+				if (Array.isArray(child)) {
+					print(child, indent + 1);
+				} else {
+					out += child.toString();
+				}
 			}
 		}
 		print(this, 0);

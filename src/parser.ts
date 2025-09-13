@@ -143,6 +143,11 @@ export class CstBuilder {
 				elem.append(trivia);
 			}
 		}
+		if (token.subtokens) {
+			for (const subtoken of token.subtokens) {
+				this.token(subtoken, elem);
+			}
+		}
 		if (token.text) {
 			elem.append(token.text);
 		}

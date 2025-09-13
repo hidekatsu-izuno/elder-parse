@@ -130,23 +130,20 @@ export class Token {
 
 	constructor(
 		type: TokenType,
-		text: string | Token[],
+		text: string,
 		options?: {
 			keyword?: Keyword;
 			preskips?: Token[];
+			subtokens?: Token[];
 			postskips?: Token[];
 			location?: SourceLocation;
 		},
 	) {
 		this.type = type;
-		if (Array.isArray(text)) {
-			this.subtokens = text;
-			this.text = text.map((token) => token.text).join("");
-		} else {
-			this.text = text;
-		}
+		this.text = text;
 		this.keyword = options?.keyword;
 		this.preskips = options?.preskips ?? [];
+		this.subtokens = options?.subtokens;
 		this.postskips = options?.postskips ?? [];
 		this.location = options?.location;
 	}
@@ -178,6 +175,7 @@ export class Token {
 		return new Token(this.type, this.text, {
 			keyword: this.keyword,
 			preskips: [...this.preskips],
+			subtokens: this.subtokens ? [...this.subtokens] : undefined,
 			postskips: [...this.postskips],
 			location: this.location?.clone(),
 		});
@@ -544,7 +542,20 @@ export class TokenReader {
 					for (const skip of this.tokens[i].preskips) {
 						text += skip.text;
 					}
-					text += `“${this.tokens[i].text}”`;
+					const subtokens = this.tokens[i].subtokens;
+					if (subtokens) {
+						for (const subtoken of subtokens) {
+							for (const skip of subtoken.preskips) {
+								text += skip.text;
+							}
+							text += `“${subtoken.text}”`;
+							for (const skip of subtoken.postskips) {
+								text += skip.text;
+							}
+						}
+					} else {
+						text += `“${this.tokens[i].text}”`;
+					}
 					for (const skip of this.tokens[i].postskips) {
 						text += skip.text;
 					}
