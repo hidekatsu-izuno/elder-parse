@@ -544,17 +544,26 @@ export class TokenReader {
 					}
 					const subtokens = this.tokens[i].subtokens;
 					if (subtokens) {
-						for (const subtoken of subtokens) {
+						for (let i = 0; i < subtokens.length; i++) {
+							const subtoken = subtokens[i];
 							for (const skip of subtoken.preskips) {
 								text += skip.text;
 							}
-							text += `“${subtoken.text}”`;
+							if (i === 0) {
+								text += "\uFFEB";
+							}
+							text += `${subtoken.text}`;
+							if (i === subtokens.length - 1) {
+								text += "\uFFE9";
+							}
 							for (const skip of subtoken.postskips) {
 								text += skip.text;
 							}
 						}
+					} else if (this.tokens[i].text) {
+						text += `\uFFEB${this.tokens[i].text}\uFFE9`;
 					} else {
-						text += `“${this.tokens[i].text}”`;
+						text += `\uFFEB<${this.tokens[i].type.name}>\uFFE9`;
 					}
 					for (const skip of this.tokens[i].postskips) {
 						text += skip.text;
@@ -580,7 +589,7 @@ export class TokenReader {
 						)} |${line}`,
 				)
 				.join("\u21B5\n");
-			message = `Unexpected token: ${token.text}\n${line}`;
+			message = `Unexpected token: ${token?.text || "<EoF>"}\n${line}`;
 		}
 
 		let prefix = "";

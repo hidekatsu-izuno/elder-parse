@@ -44,7 +44,7 @@ suite("test cst", () => {
 		assert.deepEqual(actual.toXMLString(), expected.toXMLString());
 
 		try {
-			CstNode.parseJSON(["node", { "type": "a", "__proto__": "" }]);
+			CstNode.parseJSON(["node", { type: "a", __proto__: "" }]);
 			assert.fail();
 		} catch (err: unknown) {
 			assert.ok(err);
