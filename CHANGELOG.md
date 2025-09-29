@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.4.2](https://github.com/hidekatsu-izuno/elder-parse/compare/v0.4.1...v0.4.2) (2025-09-29)
+
+
+### Features
+
+* add clone method to CstNode and improve type checking in serialization methods ([5e2512e](https://github.com/hidekatsu-izuno/elder-parse/commit/5e2512e2b44907769ca7056f377e01a70787e8cc))
+* enhance CstNode.parseJSON to prevent illegal property usage and add corresponding test ([49dec43](https://github.com/hidekatsu-izuno/elder-parse/commit/49dec43ca591e1be69ce61ef66e0fcda28863669))
+* enhance error messages in lexer and parser tests for better clarity ([62d81b7](https://github.com/hidekatsu-izuno/elder-parse/commit/62d81b7604b2871b5b954e59ce77727c8853c4ef))
+
 ## [0.4.1](https://github.com/hidekatsu-izuno/elder-parse/compare/v0.4.0...v0.4.1) (2025-09-13)
 
 
