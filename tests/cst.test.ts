@@ -155,6 +155,7 @@ suite("test cst", () => {
 			["token", { type: "b" }, "yyy"],
 		]);
 		assert.deepEqual(cst.text(), "xxxyyy");
+		assert.deepEqual(cst.selectOne("token")?.text(), "xxx");
 
 		cst = CstNode.parseJSON([
 			"node",

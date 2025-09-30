@@ -338,48 +338,40 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 
 	text() {
 		let out = "";
-		function print(elem: CstNode, indent: number) {
-			for (let i = 2; i < elem.length; i++) {
-				const child = elem[i];
-				if (Array.isArray(child)) {
-					if (child[0] === "node") {
-						print(child, indent + 1);
-					} else if (child[0] === "chunk") {
-						out += child[1].text ?? "";
-					} else if (child[0] === "token") {
-						for (let j = 2; j < child.length; j++) {
-							const child2 = child[j];
-							if (typeof child2 === "string") {
-								out += child2;
-							}
-						}
+		function print(elem: CstNode | string) {
+			if (elem instanceof CstNode) {
+				if (elem[0] === "trivia") {
+					// no handle
+				} else if (elem[0] === "chunk") {
+					out += (elem[1].text ?? "");
+				} else {
+					for (let i = 2; i < elem.length; i++) {
+						print(elem[i] as CstNode | string);
 					}
 				}
+			} else if (typeof elem === "string") {
+				out += elem;
 			}
 		}
-		print(this, 0);
+		print(this);
 		return out;
 	}
 
 	textAll() {
 		const array: string[] = [];
-		function collect(elem: CstNode) {
-			for (let i = 2; i < elem.length; i++) {
-				const child = elem[i];
-				if (Array.isArray(child)) {
-					if (child[0] === "node") {
-						collect(child);
-					} else if (child[0] === "chunk") {
-						array.push((child[1].text ?? "").toString());
-					} else if (child[0] === "token") {
-						for (let j = 2; j < child.length; j++) {
-							const child2 = child[j];
-							if (typeof child2 === "string") {
-								array.push(child2);
-							}
-						}
+		function collect(elem: CstNode | string) {
+			if (elem instanceof CstNode) {
+				if (elem[0] === "trivia") {
+					// no handle
+				} else if (elem[0] === "chunk") {
+					array.push((elem[1].text ?? "").toString());
+				} else {
+					for (let i = 2; i < elem.length; i++) {
+						collect(elem[i] as CstNode | string);
 					}
 				}
+			} else if (typeof elem === "string") {
+				array.push(elem);
 			}
 		}
 		collect(this);
