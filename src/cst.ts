@@ -343,7 +343,7 @@ export class CstNode extends Array<CstAttrs | CstNode | string> {
 				if (elem[0] === "trivia") {
 					// no handle
 				} else if (elem[0] === "chunk") {
-					out += (elem[1].text ?? "");
+					out += elem[1].text ?? "";
 				} else {
 					for (let i = 2; i < elem.length; i++) {
 						print(elem[i] as CstNode | string);
