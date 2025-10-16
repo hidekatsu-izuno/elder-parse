@@ -5,11 +5,17 @@ import {
 	type Token,
 	TokenReader,
 } from "./lexer.ts";
+import type { SourceMapV3 } from "./sourcemap.ts"
 
 export declare type ParserOptions = LexerOptions &
 	CstBuilderOptions & {
 		[key: string]: any;
 	};
+
+export declare type ParseOption = {
+	source?: string,
+	sourceMap?: SourceMapV3,
+};
 
 export abstract class Parser<L extends Lexer> {
 	private lexer: L;
@@ -20,11 +26,18 @@ export abstract class Parser<L extends Lexer> {
 		this.options = options;
 	}
 
-	parse(script: string | Token[], filename?: string) {
+	parse(script: string | Token[], options: ParseOption = {}) {
 		const tokens = Array.isArray(script)
 			? script
-			: this.lexer.lex(script, filename);
-		const reader = new TokenReader(tokens);
+			: this.lexer.lex(script, options.source);
+		const reader = new TokenReader(tokens, {
+			sourceContent: !Array.isArray(script) ? (source) => {
+				if ((options.source && options.source === source) || (!options.source && !source)) {
+					return script;
+				}
+			} : undefined,
+			sourceMap: options.sourceMap,
+		});
 		const builder = new CstBuilder(this.options);
 		this.parseTokens(reader, builder);
 		return builder.root;

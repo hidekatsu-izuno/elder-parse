@@ -61,6 +61,7 @@
 		"typescript": "^5.9.2"
 	},
 	"dependencies": {
+		"@jridgewell/sourcemap-codec": "^1.5.5",
 		"css-select": "^6.0.0"
 	}
 }

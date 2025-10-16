@@ -1,3 +1,5 @@
+import type { SourceMapV3 } from "./sourcemap.ts"
+
 export class TokenType {
 	name: string;
 	skip: boolean;
@@ -72,13 +74,11 @@ export class Keyword {
 }
 
 export class SourceLocation {
-	position: number;
 	lineNumber: number;
 	columnNumber: number;
 	source?: string;
 
-	constructor(position = 0, lineNumber = 1, columnNumber = 0, source?: string) {
-		this.position = position;
+	constructor(lineNumber = 1, columnNumber = 0, source?: string) {
 		this.lineNumber = lineNumber;
 		this.columnNumber = columnNumber;
 		this.source = source;
@@ -86,7 +86,6 @@ export class SourceLocation {
 
 	clone() {
 		return new SourceLocation(
-			this.position,
 			this.lineNumber,
 			this.columnNumber,
 			this.source,
@@ -98,15 +97,7 @@ export class SourceLocation {
 		if (this.source != null) {
 			out += this.source;
 		}
-		if (this.lineNumber != null) {
-			out += `[${this.lineNumber}`;
-			if (this.columnNumber != null) {
-				out += `,${this.columnNumber}`;
-			}
-			out += "] ";
-		} else if (this.position != null) {
-			out += `:${this.position}`;
-		}
+		out += `[${this.lineNumber},${this.columnNumber}]`;
 		return out;
 	}
 }
@@ -254,15 +245,11 @@ export abstract class Lexer {
 	}
 
 	lex(input: string, source?: string) {
-		let pos = 0;
-		if (input.charAt(0) === "\uFEFF") {
-			pos++;
-		}
 		const state = {};
 		this.initState(state);
 
 		const location = this.options.location
-			? new SourceLocation(pos, 1, 0, source)
+			? new SourceLocation(1, 0, source)
 			: undefined;
 		return this.sublex(state, input, location);
 	}
@@ -299,7 +286,6 @@ export abstract class Lexer {
 						text = m[0];
 						if (start) {
 							location = new SourceLocation(
-								pos + start.position,
 								lineNumber,
 								columnNumber,
 								source,
@@ -389,9 +375,9 @@ export abstract class Lexer {
 				if (index !== -1) {
 					let lastIndex: number;
 					do {
-						lastIndex = index;
+						lastIndex = index + 1;
 						lineNumber++;
-						index = text.indexOf("\n", lastIndex + 1);
+						index = text.indexOf("\n", lastIndex);
 					} while (index !== -1);
 					columnNumber = text.length - lastIndex;
 				} else {
@@ -405,7 +391,6 @@ export abstract class Lexer {
 				preskips: skips,
 				location: start
 					? new SourceLocation(
-							pos + start.position,
 							lineNumber,
 							columnNumber,
 							source,
@@ -418,13 +403,20 @@ export abstract class Lexer {
 	}
 }
 
+export declare type TokenReaderOptions = {
+	sourceContent?: (source?: string) => string | undefined,
+	sourceMap?: SourceMapV3,
+};
+
 export class TokenReader {
+	options: TokenReaderOptions;
 	tokens: Token[];
 	pos = 0;
 	state: Record<string, any> = {};
 
-	constructor(tokens: Token[]) {
+	constructor(tokens: Token[], options: TokenReaderOptions = {}) {
 		this.tokens = tokens;
+		this.options = options;
 	}
 
 	peek(pos = 0) {
@@ -486,122 +478,44 @@ export class TokenReader {
 
 	createParseError(options: { message?: string } = {}) {
 		const token = this.peek();
-		const source = token?.location?.source;
-		let lineNumber = token?.location?.lineNumber;
-		let columnNumber = token?.location?.columnNumber;
-		let message = options.message;
-
-		if (lineNumber == null) {
-			lineNumber = 1;
-			for (let i = 0; i < this.pos; i++) {
-				const text = this.tokens[i].toString();
-				lineNumber += text.match(/\r?\n/g)?.length || 0;
-			}
-		}
-		if (columnNumber == null) {
-			columnNumber = 1;
-			for (let i = this.pos - 1; i >= 0; i--) {
-				const text = this.tokens[i].toString();
-				const index = text.indexOf("\n");
-				if (index !== -1) {
-					columnNumber += text.length - index;
-					break;
+		const tokenText = token && token.type !== Lexer.EoF ? token.text : "<EoF>";
+		let message = options.message ?? "Unexpected token";
+		let details = "";
+		if (token?.location) {
+			message = `${token.location} ${message}`;
+			const source = token.location.source;
+			const content = this.options.sourceContent?.(source);
+			if (content) {
+				const lines = content.split(/\r?\n/g);
+				const numSize = `${lines.length}`.length;
+				if (token.location.lineNumber - 2 < lines.length) {
+					details += `\n${`${token.location.lineNumber - 1}`.padStart(numSize, "0")} |${lines[token.location.lineNumber - 2]}`;
 				}
-				columnNumber += text.length;
-			}
-		}
-
-		if (message == null) {
-			const current = Math.min(this.pos, this.tokens.length - 1);
-			let start = current;
-			let count = 0;
-			while (start > 0) {
-				const text = this.tokens[start].toString();
-				if (text.indexOf("\n") !== -1) {
-					if (count > 1) {
-						break;
-					}
-					count++;
-				}
-				start--;
-			}
-			let end = current;
-			while (end < this.tokens.length) {
-				const text = this.tokens[end].toString();
-				if (text.indexOf("\n") !== -1) {
-					break;
-				}
-				end++;
-			}
-			end = Math.min(end, this.tokens.length - 1);
-
-			let line = "";
-			for (let i = start; i <= end; i++) {
-				let text = "";
-				if (i === current) {
-					for (const skip of this.tokens[i].preskips) {
-						text += skip.text;
-					}
-					const subtokens = this.tokens[i].subtokens;
-					if (subtokens) {
-						for (let i = 0; i < subtokens.length; i++) {
-							const subtoken = subtokens[i];
-							for (const skip of subtoken.preskips) {
-								text += skip.text;
-							}
-							if (i === 0) {
-								text += "\uFFEB";
-							}
-							text += `${subtoken.text}`;
-							if (i === subtokens.length - 1) {
-								text += "\uFFE9";
-							}
-							for (const skip of subtoken.postskips) {
-								text += skip.text;
-							}
-						}
-					} else if (this.tokens[i].text) {
-						text += `\uFFEB${this.tokens[i].text}\uFFE9`;
+				if (token.location.lineNumber - 1 < lines.length) {
+					let line = lines[token.location.lineNumber - 1];
+					if (token.location.columnNumber === 0) {
+						line = `\u261A${line}`;
+					} else if (token.location.columnNumber < line.length) {
+						line = `${line.substring(0, token.location.columnNumber)}\u261A${line.substring(token.location.columnNumber)}`;
 					} else {
-						text += `\uFFEB<${this.tokens[i].type.name}>\uFFE9`;
+						line += "\u261A";
 					}
-					for (const skip of this.tokens[i].postskips) {
-						text += skip.text;
-					}
-				} else {
-					text = this.tokens[i].toString();
-					if (i === start) {
-						text = text.replace(/^.*\n/, "");
-					} else if (i === end) {
-						text = text.replace(/\n.*$/s, "");
-					}
+					details += `\n${`${token.location.lineNumber}`.padStart(numSize, "0")}>|${line}`;
 				}
-				line += text;
+				if (token.location.lineNumber < lines.length) {
+					details += `\n${`${token.location.lineNumber + 1}`.padStart(numSize, "0")} |${lines[token.location.lineNumber]}`;
+				}
 			}
-			line = line
-				.split(/\r?\n/g)
-				.map(
-					(line, index, array) =>
-						`${
-							index + 1 === array.length ? "> " : "  "
-						}${`${lineNumber - (array.length - index - 1)}`.padStart(
-							`${lineNumber}`.length,
-						)} |${line}`,
-				)
-				.join("\u21B5\n");
-			message = `Unexpected token: ${token?.text || "<EoF>"}\n${line}`;
 		}
 
-		let prefix = "";
-		if (source != null) {
-			prefix += source;
+		const err = new ParseError(`${message}: ${tokenText}${details}`);
+		if (token.location?.source) {
+			err.source = token.location.source;
 		}
-		prefix += `[${lineNumber},${columnNumber}] `;
-
-		const err = new ParseError(prefix + message);
-		err.source = source;
-		err.lineNumber = lineNumber;
-		err.columnNumber = columnNumber;
+		if (token.location) {
+			err.lineNumber = token.location.lineNumber;
+			err.columnNumber = token.location.columnNumber;
+		}
 		return err;
 	}
 }

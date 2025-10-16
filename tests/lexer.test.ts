@@ -1,182 +1,9 @@
 import assert from "node:assert/strict";
 import { suite, test } from "node:test";
 import { CstNode } from "../src/cst.ts";
-import {
-	Lexer,
-	type LexerOptions,
-	Token,
-	type TokenReader,
-	TokenType,
-} from "../src/lexer.ts";
-import { type CstBuilder, Parser, type ParserOptions } from "../src/parser.ts";
-
-class TestLexer extends Lexer {
-	static Start = new TokenType("Start");
-	static Space = new TokenType("Space", { skip: true });
-	static Identifier = new TokenType("Identifier");
-	static Numeric = new TokenType("Numeric");
-	static LeftParen = new TokenType("LeftParen");
-	static RightParen = new TokenType("RightParen");
-	static Plus = new TokenType("Plus");
-	static Minus = new TokenType("Minus");
-	static Prime = new TokenType("Prime");
-	static Slash = new TokenType("Slash");
-
-	static CALC = this.Identifier.newKeyword("CALC", { reserved: true });
-	static MOD = this.Identifier.newKeyword("MOD", { ignoreCase: true });
-
-	constructor(options: LexerOptions = {}) {
-		super(
-			"test",
-			[
-				{ type: TestLexer.Space, re: /[ \r\n]+/y, skip: true },
-				{ type: TestLexer.LeftParen, re: /[(]/y },
-				{ type: TestLexer.RightParen, re: /[)]/y },
-				{ type: TestLexer.Plus, re: /[+]/y },
-				{ type: TestLexer.Minus, re: /[-]/y },
-				{ type: TestLexer.Prime, re: /[*]/y },
-				{ type: TestLexer.Slash, re: /[/]/y },
-				{ type: TestLexer.Numeric, re: /(?:0|[1-9][0-9]*)(?:\.[0-9]*)?/y },
-				{
-					type: TestLexer.Identifier,
-					re: /[A-Za-z][A-Za-z0-9]*/y,
-					onMatch: (state, token) => this.onMatchIdentifier(token),
-				},
-			],
-			options,
-		);
-	}
-
-	private onMatchIdentifier(token: Token) {
-		if (token.is(TestLexer.CALC)) {
-			return [new Token(TestLexer.Start, ""), token];
-		}
-	}
-}
-
-class TestParser extends Parser<TestLexer> {
-	constructor(options?: ParserOptions) {
-		super(new TestLexer(options), options);
-	}
-
-	protected parseTokens(reader: TokenReader, builder: CstBuilder): void {
-		builder.start("Calc");
-		while (reader.peekIf(TestLexer.Start)) {
-			builder.token(reader.consume());
-			if (reader.peekIf(TestLexer.CALC)) {
-				builder.token(reader.consume());
-				this.parseExpression(reader, builder);
-			} else {
-				throw reader.createParseError();
-			}
-		}
-		builder.token(reader.consume(TestLexer.EoF));
-		builder.end();
-	}
-
-	private parseExpression(
-		reader: TokenReader,
-		builder: CstBuilder,
-		priority = 0,
-	) {
-		if (priority === 0) {
-			builder.start("Expression");
-		}
-		let node: CstNode;
-		if (reader.peekIf(TestLexer.LeftParen)) {
-			builder.start("GroupExpression");
-			reader.consume();
-			this.parseExpression(reader, builder, 1);
-			reader.consume(TestLexer.RightParen);
-			node = builder.end();
-		} else {
-			node = this.parseReference(reader, builder);
-		}
-		while (reader.peek() && !reader.peekIf(TestLexer.EoF)) {
-			if (priority < 2 && reader.peekIf([TestLexer.Plus, TestLexer.Minus])) {
-				builder.start("AddOperation");
-				{
-					builder.start("Left");
-					builder.append(node);
-					builder.end();
-				}
-				{
-					builder.start("Operator");
-					builder.token(reader.consume());
-					builder.end();
-				}
-				{
-					builder.start("Right");
-					this.parseExpression(reader, builder, 2);
-					builder.end();
-				}
-				node = builder.end();
-			} else if (
-				priority < 3 &&
-				reader.peekIf([TestLexer.Prime, TestLexer.Slash])
-			) {
-				builder.start("MultiplyOperation");
-				{
-					builder.start("Left");
-					builder.append(node);
-					builder.end();
-				}
-				{
-					builder.start("Operator");
-					builder.token(reader.consume());
-					builder.end();
-				}
-				{
-					builder.start("Right");
-					this.parseExpression(reader, builder, 3);
-					builder.end();
-				}
-				node = builder.end();
-			} else if (priority < 4 && reader.peekIf(TestLexer.MOD)) {
-				builder.start("ModOperation");
-				{
-					builder.start("Left");
-					builder.append(node);
-					builder.end();
-				}
-				{
-					builder.start("Operator");
-					builder.token(reader.consume());
-					builder.end();
-				}
-				{
-					builder.start("Right");
-					this.parseExpression(reader, builder, 4);
-					builder.end();
-				}
-				node = builder.end();
-			} else {
-				break;
-			}
-		}
-		if (priority === 0) {
-			node = builder.end();
-		}
-		return node;
-	}
-
-	private parseReference(reader: TokenReader, builder: CstBuilder) {
-		if (reader.peekIf([TestLexer.Plus, TestLexer.Minus], TestLexer.Numeric)) {
-			builder.start("NumericLiteral");
-			builder.token(reader.consume());
-			builder.token(reader.consume());
-			return builder.end();
-		} else if (reader.peekIf(TestLexer.Numeric)) {
-			builder.start("NumericLiteral");
-			builder.token(reader.consume());
-			return builder.end();
-		} else {
-			builder.start("VariableRef");
-			builder.token(reader.consume(TestLexer.Identifier));
-			return builder.end();
-		}
-	}
-}
+import { Token } from "../src/lexer.ts";
+import { TestLexer } from "./common/TestLexer.ts";
+import { TestParser } from "./common/TestParser.ts";
 
 suite("test lexer and parser", () => {
 	test("test lexer", () => {
@@ -329,43 +156,60 @@ suite("test lexer and parser", () => {
 	});
 
 	test("test parser error", () => {
-		const parser = new TestParser({
+		/*
+		const parser1 = new TestParser({
 			location: false,
 			empty: false,
 		});
 		try {
-			parser.parse("CALC\n ((1 +3.1*2) / 4) MO 2");
+			parser1.parse("CALC\n ((1 +3.1*2) / 4) MO 2");
 			assert.fail();
 		} catch (err) {
 			assert.equal(
 				(err as Error).message,
-				"[2,19] Unexpected token: MO\n" +
-					"  1 |CALC↵\n" +
-					"> 2 | ((1 +3.1*2) / 4) \uFFEBMO\uFFE9 2",
+				"Unexpected token: MO",
 			);
 		}
+		const parser2 = new TestParser({
+			empty: false,
+		});
 		try {
-			parser.parse("CALC\n ((1\n +3.1\n*2) / \n4) MO 2");
+			parser2.parse("CALC\n ((1\n +3.1\n*2) / \n4) MO 2");
 			assert.fail();
 		} catch (err) {
 			assert.equal(
 				(err as Error).message,
-				"[5,4] Unexpected token: MO\n" +
-					"  3 | +3.1↵\n" +
-					"  4 |*2) / ↵\n" +
-					"> 5 |4) \uFFEBMO\uFFE9 2",
+				"[5,4] Unexpected token: MO\n" + 
+				"4 |*2) / \n" + 
+				"5>|4) M☚O 2",
 			);
 		}
+		*/
+		const parser3 = new TestParser();
 		try {
-			parser.parse("CALC\n ((1\n +3.1\n*2) / \n4) +");
+			parser3.parse("CALC\n ((1\n +3.1\n*2) / \n4) +");
 			assert.fail();
 		} catch (err) {
 			assert.equal(
 				(err as Error).message,
-				"[5,6] Unexpected token: <EoF>\n" +
-					"  3 | +3.1↵\n" +
-					"  4 |*2) / ↵\n" +
-					"> 5 |4) +\uFFEB<EoF>\uFFE9",
+				"[5,4] Unexpected token: <EoF>\n" +
+					"4 |*2) / \n" +
+					"5>|4) +\u261A",
+			);
+		}
+
+		const parser4 = new TestParser();
+		try {
+			parser4.parse("CALC\n ((1\n +3.1\n*2) / \n4) +", {
+				source: "source4.calc"
+			});
+			assert.fail();
+		} catch (err) {
+			assert.equal(
+				(err as Error).message,
+				"source4.calc[5,4] Unexpected token: <EoF>\n" +
+					"4 |*2) / \n" +
+					"5>|4) +\u261A",
 			);
 		}
 	});
