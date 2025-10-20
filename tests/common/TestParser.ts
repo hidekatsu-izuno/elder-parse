@@ -12,7 +12,7 @@ export class TestParser extends Parser<TestLexer> {
 		super(new TestLexer(options), options);
 	}
 
-	protected parseTokens(reader: TokenReader, builder: CstBuilder): void {
+	protected process(reader: TokenReader, builder: CstBuilder): void {
 		builder.start("Calc");
 		while (reader.peekIf(TestLexer.Start)) {
 			builder.token(reader.consume());
@@ -20,7 +20,7 @@ export class TestParser extends Parser<TestLexer> {
 				builder.token(reader.consume());
 				this.parseExpression(reader, builder);
 			} else {
-				throw reader.createParseError();
+				throw reader.createParseError({ message: "Test Error!" });
 			}
 		}
 		builder.token(reader.consume(TestLexer.EoF));

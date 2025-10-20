@@ -5,7 +5,6 @@ import {
 	type Token,
 	TokenReader,
 } from "./lexer.ts";
-import type { SourceMapV3 } from "./sourcemap.ts"
 
 export declare type ParserOptions = LexerOptions &
 	CstBuilderOptions & {
@@ -13,8 +12,8 @@ export declare type ParserOptions = LexerOptions &
 	};
 
 export declare type ParseOption = {
-	source?: string,
-	sourceMap?: SourceMapV3,
+	source?: string;
+	lex?: boolean;
 };
 
 export abstract class Parser<L extends Lexer> {
@@ -26,27 +25,20 @@ export abstract class Parser<L extends Lexer> {
 		this.options = options;
 	}
 
-	parse(script: string | Token[], options: ParseOption = {}) {
-		const tokens = Array.isArray(script)
-			? script
-			: this.lexer.lex(script, options.source);
-		const reader = new TokenReader(tokens, {
-			sourceContent: !Array.isArray(script) ? (source) => {
-				if ((options.source && options.source === source) || (!options.source && !source)) {
-					return script;
-				}
-			} : undefined,
-			sourceMap: options.sourceMap,
-		});
+	parse(input: string | Token[], options: ParseOption = {}) {
+		let tokens: Token[];
+		if (options.lex === false && Array.isArray(input)) {
+			tokens = input;
+		} else {
+			tokens = this.lexer.lex(input, options.source);
+		}
+		const reader = new TokenReader(tokens);
 		const builder = new CstBuilder(this.options);
-		this.parseTokens(reader, builder);
+		this.process(reader, builder);
 		return builder.root;
 	}
 
-	protected abstract parseTokens(
-		reader: TokenReader,
-		builder: CstBuilder,
-	): void;
+	protected abstract process(reader: TokenReader, builder: CstBuilder): void;
 }
 
 export class AggregateParseError extends Error {

@@ -1,5 +1,3 @@
-import type { SourceMapV3 } from "./sourcemap.ts"
-
 export class TokenType {
 	name: string;
 	skip: boolean;
@@ -74,11 +72,18 @@ export class Keyword {
 }
 
 export class SourceLocation {
+	content: string;
 	lineNumber: number;
 	columnNumber: number;
 	source?: string;
 
-	constructor(lineNumber = 1, columnNumber = 0, source?: string) {
+	constructor(
+		content: string,
+		lineNumber = 1,
+		columnNumber = 0,
+		source?: string,
+	) {
+		this.content = content;
 		this.lineNumber = lineNumber;
 		this.columnNumber = columnNumber;
 		this.source = source;
@@ -86,6 +91,7 @@ export class SourceLocation {
 
 	clone() {
 		return new SourceLocation(
+			this.content,
 			this.lineNumber,
 			this.columnNumber,
 			this.source,
@@ -209,7 +215,6 @@ export declare type TokenPattern = {
 
 export declare type LexerOptions = {
 	skipTokenStrategy?: "ignore" | "next" | "adaptive";
-	location?: boolean;
 	[key: string]: any;
 };
 
@@ -236,22 +241,38 @@ export abstract class Lexer {
 		if (!this.options.skipTokenStrategy) {
 			this.options.skipTokenStrategy = "adaptive";
 		}
-		if (this.options.location === undefined) {
-			this.options.location = true;
-		}
 		if (this.options.patternFilter) {
 			this.patterns = this.options.patternFilter(this.patterns);
 		}
 	}
 
-	lex(input: string, source?: string) {
+	lex(input: string | Token[], source?: string) {
 		const state = {};
 		this.initState(state);
 
-		const location = this.options.location
-			? new SourceLocation(1, 0, source)
-			: undefined;
-		return this.sublex(state, input, location);
+		if (typeof input === "string") {
+			return this.sublex(state, input, new SourceLocation(input, 1, 0, source));
+		}
+
+		const mapping = [];
+		let text = "";
+		for (const token of input) {
+			mapping.push(token.location);
+			text += `${token.text}\n`;
+		}
+		const tokens = this.sublex(
+			state,
+			text,
+			new SourceLocation(text, 1, 0, source),
+		);
+		for (const token of tokens) {
+			let sloc: SourceLocation | undefined;
+			if (token.location?.lineNumber != null) {
+				sloc = mapping[token.location.lineNumber - 1];
+			}
+			token.location = sloc;
+		}
+		return tokens;
 	}
 
 	isReserved(keyword: Keyword) {
@@ -267,8 +288,9 @@ export abstract class Lexer {
 	) {
 		const tokens: Token[] = [];
 		let pos = 0;
-		let lineNumber = start?.lineNumber ?? 1;
-		let columnNumber = start?.columnNumber ?? 0;
+		const content = start ? start.content : input;
+		let lineNumber = start ? start.lineNumber : 1;
+		let columnNumber = start ? start.columnNumber : 0;
 		const source = start?.source;
 
 		let skips = [];
@@ -284,14 +306,12 @@ export abstract class Lexer {
 					if (m) {
 						pattern = pat;
 						text = m[0];
-						if (start) {
-							location = new SourceLocation(
-								lineNumber,
-								columnNumber,
-								source,
-							);
-						}
-
+						location = new SourceLocation(
+							content,
+							lineNumber,
+							columnNumber,
+							source,
+						);
 						pos = re.lastIndex;
 						break;
 					}
@@ -370,32 +390,24 @@ export abstract class Lexer {
 				}
 			}
 
-			if (start) {
-				let index = text.indexOf("\n");
-				if (index !== -1) {
-					let lastIndex: number;
-					do {
-						lastIndex = index + 1;
-						lineNumber++;
-						index = text.indexOf("\n", lastIndex);
-					} while (index !== -1);
-					columnNumber = text.length - lastIndex;
-				} else {
-					columnNumber += text.length;
-				}
+			let index = text.indexOf("\n");
+			if (index !== -1) {
+				let lastIndex: number;
+				do {
+					lastIndex = index + 1;
+					lineNumber++;
+					index = text.indexOf("\n", lastIndex);
+				} while (index !== -1);
+				columnNumber = text.length - lastIndex;
+			} else {
+				columnNumber += text.length;
 			}
 		}
 
 		tokens.push(
 			new Token(Lexer.EoF, "", {
 				preskips: skips,
-				location: start
-					? new SourceLocation(
-							lineNumber,
-							columnNumber,
-							source,
-						)
-					: undefined,
+				location: new SourceLocation(content, lineNumber, columnNumber, source),
 			}),
 		);
 
@@ -403,20 +415,13 @@ export abstract class Lexer {
 	}
 }
 
-export declare type TokenReaderOptions = {
-	sourceContent?: (source?: string) => string | undefined,
-	sourceMap?: SourceMapV3,
-};
-
 export class TokenReader {
-	options: TokenReaderOptions;
 	tokens: Token[];
 	pos = 0;
 	state: Record<string, any> = {};
 
-	constructor(tokens: Token[], options: TokenReaderOptions = {}) {
+	constructor(tokens: Token[]) {
 		this.tokens = tokens;
-		this.options = options;
 	}
 
 	peek(pos = 0) {
@@ -478,45 +483,42 @@ export class TokenReader {
 
 	createParseError(options: { message?: string } = {}) {
 		const token = this.peek();
-		const tokenText = token && token.type !== Lexer.EoF ? token.text : "<EoF>";
 		let message = options.message ?? "Unexpected token";
-		let details = "";
+		let text = token && token.type !== Lexer.EoF ? token.text : "<EoF>";
 		if (token?.location) {
 			message = `${token.location} ${message}`;
-			const source = token.location.source;
-			const content = this.options.sourceContent?.(source);
-			if (content) {
-				const lines = content.split(/\r?\n/g);
+
+			if (token.location.content) {
+				const lineNumber = token.location.lineNumber;
+				const columnNumber = token.location.columnNumber;
+				const lines = token.location.content.split(/\r?\n/g);
 				const numSize = `${lines.length}`.length;
-				if (token.location.lineNumber - 2 < lines.length) {
-					details += `\n${`${token.location.lineNumber - 1}`.padStart(numSize, "0")} |${lines[token.location.lineNumber - 2]}`;
+				if (lineNumber >= 2 && lineNumber - 2 < lines.length) {
+					text += `\n${`${lineNumber - 1}`.padStart(numSize, "0")} |${lines[lineNumber - 2]}`;
 				}
-				if (token.location.lineNumber - 1 < lines.length) {
+				if (lineNumber >= 1 && lineNumber - 1 < lines.length) {
 					let line = lines[token.location.lineNumber - 1];
-					if (token.location.columnNumber === 0) {
-						line = `\u261A${line}`;
-					} else if (token.location.columnNumber < line.length) {
-						line = `${line.substring(0, token.location.columnNumber)}\u261A${line.substring(token.location.columnNumber)}`;
+					if (columnNumber === 0) {
+						line = `\u2BC6${line}`;
+					} else if (columnNumber < line.length) {
+						line = `${line.substring(0, columnNumber)}\u2BC6${line.substring(columnNumber)}`;
 					} else {
-						line += "\u261A";
+						line += "\u2BC6";
 					}
-					details += `\n${`${token.location.lineNumber}`.padStart(numSize, "0")}>|${line}`;
+					text += `\n${`${lineNumber}`.padStart(numSize, "0")}>|${line}`;
 				}
-				if (token.location.lineNumber < lines.length) {
-					details += `\n${`${token.location.lineNumber + 1}`.padStart(numSize, "0")} |${lines[token.location.lineNumber]}`;
+				if (lineNumber >= 0 && lineNumber < lines.length) {
+					text += `\n${`${lineNumber + 1}`.padStart(numSize, "0")} |${lines[lineNumber]}`;
 				}
 			}
-		}
 
-		const err = new ParseError(`${message}: ${tokenText}${details}`);
-		if (token.location?.source) {
-			err.source = token.location.source;
-		}
-		if (token.location) {
+			const err = new ParseError(`${message}: ${text}`);
 			err.lineNumber = token.location.lineNumber;
 			err.columnNumber = token.location.columnNumber;
+			err.source = token.location.source;
+			return err;
 		}
-		return err;
+		return new ParseError(`${message}: ${text}`);
 	}
 }
 

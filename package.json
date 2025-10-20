@@ -55,13 +55,12 @@
 		"./package.json": "./package.json"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.2.4",
-		"@types/node": "^24.3.3",
+		"@biomejs/biome": "2.2.6",
+		"@types/node": "^24.8.1",
 		"commit-and-tag-version": "^12.6.0",
-		"typescript": "^5.9.2"
+		"typescript": "^5.9.3"
 	},
 	"dependencies": {
-		"@jridgewell/sourcemap-codec": "^1.5.5",
 		"css-select": "^6.0.0"
 	}
 }

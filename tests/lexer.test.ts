@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { suite, test } from "node:test";
 import { CstNode } from "../src/cst.ts";
-import { Token } from "../src/lexer.ts";
+import { SourceLocation, Token } from "../src/lexer.ts";
 import { TestLexer } from "./common/TestLexer.ts";
 import { TestParser } from "./common/TestParser.ts";
 
@@ -9,26 +9,58 @@ suite("test lexer and parser", () => {
 	test("test lexer", () => {
 		const lexer = new TestLexer({
 			skipTokenStrategy: "ignore",
-			location: false,
 		});
-		const tokens = lexer.lex("CALC ((1 +3.1*2) / 4) MOD 2");
+		const content = "CALC ((1 +3.1*2) / 4) MOD 2";
+		const tokens = lexer.lex(content);
 		assert.deepEqual(tokens, [
 			new Token(TestLexer.Start, ""),
-			new Token(TestLexer.Reserved, "CALC", { keyword: TestLexer.CALC }),
-			new Token(TestLexer.LeftParen, "("),
-			new Token(TestLexer.LeftParen, "("),
-			new Token(TestLexer.Numeric, "1"),
-			new Token(TestLexer.Plus, "+"),
-			new Token(TestLexer.Numeric, "3.1"),
-			new Token(TestLexer.Prime, "*"),
-			new Token(TestLexer.Numeric, "2"),
-			new Token(TestLexer.RightParen, ")"),
-			new Token(TestLexer.Slash, "/"),
-			new Token(TestLexer.Numeric, "4"),
-			new Token(TestLexer.RightParen, ")"),
-			new Token(TestLexer.Identifier, "MOD", { keyword: TestLexer.MOD }),
-			new Token(TestLexer.Numeric, "2"),
-			new Token(TestLexer.EoF, ""),
+			new Token(TestLexer.Reserved, "CALC", {
+				keyword: TestLexer.CALC,
+				location: new SourceLocation(content, 1, 0),
+			}),
+			new Token(TestLexer.LeftParen, "(", {
+				location: new SourceLocation(content, 1, 5),
+			}),
+			new Token(TestLexer.LeftParen, "(", {
+				location: new SourceLocation(content, 1, 6),
+			}),
+			new Token(TestLexer.Numeric, "1", {
+				location: new SourceLocation(content, 1, 7),
+			}),
+			new Token(TestLexer.Plus, "+", {
+				location: new SourceLocation(content, 1, 9),
+			}),
+			new Token(TestLexer.Numeric, "3.1", {
+				location: new SourceLocation(content, 1, 10),
+			}),
+			new Token(TestLexer.Prime, "*", {
+				location: new SourceLocation(content, 1, 13),
+			}),
+			new Token(TestLexer.Numeric, "2", {
+				location: new SourceLocation(content, 1, 14),
+			}),
+			new Token(TestLexer.RightParen, ")", {
+				location: new SourceLocation(content, 1, 15),
+			}),
+			new Token(TestLexer.Slash, "/", {
+				location: new SourceLocation(content, 1, 17),
+			}),
+			new Token(TestLexer.Numeric, "4", {
+				location: new SourceLocation(content, 1, 19),
+			}),
+			new Token(TestLexer.RightParen, ")", {
+				location: new SourceLocation(content, 1, 20),
+			}),
+			new Token(TestLexer.Identifier, "MOD", {
+				keyword: TestLexer.MOD,
+				location: new SourceLocation(content, 1, 22),
+			}),
+			new Token(TestLexer.Numeric, "2", {
+				location: new SourceLocation(content, 1, 26),
+			}),
+			new Token(TestLexer.EoF, "", {
+				location: new SourceLocation(content, 1, 27),
+			}),
 		]);
 	});
 
@@ -156,9 +188,7 @@ suite("test lexer and parser", () => {
 	});
 
 	test("test parser error", () => {
-		/*
 		const parser1 = new TestParser({
-			location: false,
 			empty: false,
 		});
 		try {
@@ -167,7 +197,9 @@ suite("test lexer and parser", () => {
 		} catch (err) {
 			assert.equal(
 				(err as Error).message,
-				"Unexpected token: MO",
+				"[2,18] Unexpected token: MO\n" +
+					"1 |CALC\n" +
+					"2>| ((1 +3.1*2) / 4) \u2BC6MO 2",
 			);
 		}
 		const parser2 = new TestParser({
@@ -179,12 +211,9 @@ suite("test lexer and parser", () => {
 		} catch (err) {
 			assert.equal(
 				(err as Error).message,
-				"[5,4] Unexpected token: MO\n" + 
-				"4 |*2) / \n" + 
-				"5>|4) M☚O 2",
+				"[5,3] Unexpected token: MO\n" + "4 |*2) / \n" + "5>|4) \u2BC6MO 2",
 			);
 		}
-		*/
 		const parser3 = new TestParser();
 		try {
 			parser3.parse("CALC\n ((1\n +3.1\n*2) / \n4) +");
@@ -192,24 +221,34 @@ suite("test lexer and parser", () => {
 		} catch (err) {
 			assert.equal(
 				(err as Error).message,
+				// biome-ignore format: for multiline
 				"[5,4] Unexpected token: <EoF>\n" +
-					"4 |*2) / \n" +
-					"5>|4) +\u261A",
+				"4 |*2) / \n" +
+				"5>|4) +\u2BC6",
 			);
 		}
 
 		const parser4 = new TestParser();
+		const source = new TestLexer().lex(
+			"123456789\n\n CALC\n ((1\n +3.1\n*2) +/ \n4)123456789",
+			"source4.calc",
+		);
+		source.shift();
+		source.shift();
+		source.pop();
+		source.pop();
+
 		try {
-			parser4.parse("CALC\n ((1\n +3.1\n*2) / \n4) +", {
-				source: "source4.calc"
-			});
+			parser4.parse(source, {});
 			assert.fail();
 		} catch (err) {
 			assert.equal(
 				(err as Error).message,
-				"source4.calc[5,4] Unexpected token: <EoF>\n" +
-					"4 |*2) / \n" +
-					"5>|4) +\u261A",
+				// biome-ignore format: for multiline
+				"source4.calc[6,5] Unexpected token: /\n" +
+				"5 | +3.1\n" +
+				"6>|*2) +\u2BC6/ \n" +
+				"7 |4)123456789",
 			);
 		}
 	});
