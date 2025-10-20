@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.5.0](https://github.com/hidekatsu-izuno/elder-parse/compare/v0.4.3...v0.5.0) (2025-10-20)
+
+
+### Features
+
+* add sourcemap support and refactor lexer/parser tests ([9a5c16a](https://github.com/hidekatsu-izuno/elder-parse/commit/9a5c16aacb2b7b2055cc16126337380328f50c4d))
+* update dependencies and refactor lexer/parser for improved functionality ([dcd8040](https://github.com/hidekatsu-izuno/elder-parse/commit/dcd8040a23a58841718d501ce763f3aecccb0575))
+
+
+### Bug Fixes
+
+* update README to include test command and clean up CstNode output handling ([4cf382c](https://github.com/hidekatsu-izuno/elder-parse/commit/4cf382c3f11903e195621b97a60c236ee7773967))
+
 ## [0.4.3](https://github.com/hidekatsu-izuno/elder-parse/compare/v0.4.2...v0.4.3) (2025-09-30)
 
 
