@@ -29,6 +29,10 @@ export declare type FormatterOptions = {
 	[key: string]: any;
 };
 
+export declare type FormatterFormatOptions = {
+	source?: string,
+};
+
 export abstract class Formatter<L extends Lexer> {
 	parser: Parser<L>;
 	private patterns = [] as FormatPattern[];
@@ -44,13 +48,13 @@ export abstract class Formatter<L extends Lexer> {
 		this.options = options;
 	}
 
-	format(script: string | CstNode, filename?: string): string {
+	format(script: string | CstNode, options: FormatterFormatOptions = {}): string {
 		let node: CstNode | undefined;
 		if (script instanceof CstNode) {
 			node = script;
 		} else {
 			try {
-				node = this.parser.parse(script, filename);
+				node = this.parser.parse(script, { source: options.source });
 			} catch (err) {
 				if (err instanceof AggregateParseError) {
 					node = err.node;
