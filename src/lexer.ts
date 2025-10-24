@@ -3,9 +3,9 @@ export class TokenType {
 	skip: boolean;
 	separator: boolean;
 
-	private hasKeyword = false;
-	private map: Record<string, Keyword> = {};
-	private imap: Record<string, Keyword> = {};
+	#hasKeyword = false;
+	#map: Record<string, Keyword> = {};
+	#imap: Record<string, Keyword> = {};
 
 	constructor(
 		name: string,
@@ -28,24 +28,24 @@ export class TokenType {
 	) {
 		const keyword = new Keyword(text, options);
 		if (options?.ignoreCase) {
-			this.imap[text.toLowerCase()] = keyword;
+			this.#imap[text.toLowerCase()] = keyword;
 		} else {
-			this.map[text] = keyword;
+			this.#map[text] = keyword;
 		}
-		this.hasKeyword = true;
+		this.#hasKeyword = true;
 		return keyword;
 	}
 
 	getKeyword(name: string): Keyword | undefined {
-		if (!this.hasKeyword) {
+		if (!this.#hasKeyword) {
 			return;
 		}
 
-		const keyword = this.map[name];
+		const keyword = this.#map[name];
 		if (keyword) {
 			return keyword;
 		}
-		return this.imap[name.toLowerCase()];
+		return this.#imap[name.toLowerCase()];
 	}
 
 	toString() {
