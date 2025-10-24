@@ -246,32 +246,64 @@ export abstract class Lexer {
 		}
 	}
 
-	lex(input: string | Token[], source?: string) {
+	lex(input: string, source?: string) {
+		const state = {};
+		this.initState(state);
+		return this.sublex(state, input, new SourceLocation(input, 1, 0, source));
+	}
+
+	relex(input: Token[], source?: string) {
 		const state = {};
 		this.initState(state);
 
-		if (typeof input === "string") {
-			return this.sublex(state, input, new SourceLocation(input, 1, 0, source));
+		const mappings: { columnNumber: number, location: SourceLocation }[][] = [];
+		let text = "";
+		let lineNumber = 0;
+		let columnNumber = 0;
+		for (const token of input) {
+			if (!mappings[lineNumber]) {
+				mappings[lineNumber] = [];
+			}
+			if (token.location) {
+				mappings[lineNumber].push({ columnNumber, location: token.location });
+			}
+
+			const str = token.toString();
+			let index = str.indexOf("\n");
+			if (index !== -1) {
+				let lastIndex: number;
+				do {
+					lastIndex = index + 1;
+					lineNumber++;
+					index = str.indexOf("\n", lastIndex);
+				} while (index !== -1);
+				columnNumber = str.length - lastIndex;
+			} else {
+				columnNumber += str.length;
+			}
+			text += str;
 		}
 
-		const mapping = [];
-		let text = "";
-		for (const token of input) {
-			mapping.push(token.location);
-			text += `${token.text}\n`;
-		}
 		const tokens = this.sublex(
 			state,
 			text,
 			new SourceLocation(text, 1, 0, source),
 		);
+
 		for (const token of tokens) {
-			let sloc: SourceLocation | undefined;
-			if (token.location?.lineNumber != null) {
-				sloc = mapping[token.location.lineNumber - 1];
+			if (token.location) {
+				const mcols = mappings[token.location.lineNumber - 1];
+				if (mcols) {
+					for (const mcol of mcols) {
+						if (mcol.columnNumber === token.location.columnNumber) {
+							token.location = mcol.location;
+							break;
+						}
+					}
+				}
 			}
-			token.location = sloc;
 		}
+
 		return tokens;
 	}
 

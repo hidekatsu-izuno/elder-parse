@@ -13,11 +13,10 @@ export declare type ParserOptions = LexerOptions &
 
 export declare type ParseOption = {
 	source?: string;
-	lex?: boolean;
 };
 
 export abstract class Parser<L extends Lexer> {
-	private lexer: L;
+	readonly lexer: L;
 	private options: ParserOptions;
 
 	constructor(lexer: L, options: ParserOptions = {}) {
@@ -27,7 +26,7 @@ export abstract class Parser<L extends Lexer> {
 
 	parse(input: string | Token[], options: ParseOption = {}) {
 		let tokens: Token[];
-		if (options.lex === false && Array.isArray(input)) {
+		if (Array.isArray(input)) {
 			tokens = input;
 		} else {
 			tokens = this.lexer.lex(input, options.source);

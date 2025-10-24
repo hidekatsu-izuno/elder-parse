@@ -229,7 +229,7 @@ suite("test lexer and parser", () => {
 		}
 
 		const parser4 = new TestParser();
-		const source = new TestLexer().lex(
+		let source = parser4.lexer.lex(
 			"123456789\n\n CALC\n ((1\n +3.1\n*2) +/ \n4)123456789",
 			"source4.calc",
 		);
@@ -238,8 +238,10 @@ suite("test lexer and parser", () => {
 		source.pop();
 		source.pop();
 
+		source = parser4.lexer.relex(source);
+
 		try {
-			parser4.parse(source, {});
+			parser4.parse(source);
 			assert.fail();
 		} catch (err) {
 			assert.equal(
