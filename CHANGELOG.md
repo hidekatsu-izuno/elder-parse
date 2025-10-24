@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.5.1](https://github.com/hidekatsu-izuno/elder-parse/compare/v0.5.0...v0.5.1) (2025-10-24)
+
+
+### Features
+
+* add toString method to Keyword class for improved string representation ([50e53cb](https://github.com/hidekatsu-izuno/elder-parse/commit/50e53cb0b845c05a9c22571ec240496160210f3a))
+* enhance format method to accept source option for improved parsing ([48666c7](https://github.com/hidekatsu-izuno/elder-parse/commit/48666c7598314089cb988a2b2953692737998e35))
+* refactor lexer and parser methods for improved source handling and token processing ([cf9e778](https://github.com/hidekatsu-izuno/elder-parse/commit/cf9e77859dc404fa46fe085becf11e376612f7f0))
+* refactor TokenType class to use private class fields for encapsulation ([d32c37e](https://github.com/hidekatsu-izuno/elder-parse/commit/d32c37e6f91e8566759ff6b312ef404c7f1f088b))
+
+
+### Bug Fixes
+
+* correct syntax for type definitions in formatter and lexer ([b7ee6df](https://github.com/hidekatsu-izuno/elder-parse/commit/b7ee6df1ec8170b132f51da607721da24d780169))
+
 ## [0.5.0](https://github.com/hidekatsu-izuno/elder-parse/compare/v0.4.3...v0.5.0) (2025-10-20)
 
 
