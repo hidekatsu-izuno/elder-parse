@@ -69,6 +69,10 @@ export class Keyword {
 		this.ignoreCase = !!options?.ignoreCase;
 		this.reserved = !!options?.reserved;
 	}
+
+	toString() {
+		return this.name;
+	}
 }
 
 export class SourceLocation {
