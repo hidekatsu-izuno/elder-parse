@@ -260,7 +260,7 @@ export abstract class Lexer {
 		const state = {};
 		this.initState(state);
 
-		const mappings: { columnNumber: number, location: SourceLocation }[][] = [];
+		const mappings: { columnNumber: number; location: SourceLocation }[][] = [];
 		let text = "";
 		let lineNumber = 0;
 		let columnNumber = 0;

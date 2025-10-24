@@ -30,7 +30,7 @@ export declare type FormatterOptions = {
 };
 
 export declare type FormatterFormatOptions = {
-	source?: string,
+	source?: string;
 };
 
 export abstract class Formatter<L extends Lexer> {
@@ -48,7 +48,10 @@ export abstract class Formatter<L extends Lexer> {
 		this.options = options;
 	}
 
-	format(script: string | CstNode, options: FormatterFormatOptions = {}): string {
+	format(
+		script: string | CstNode,
+		options: FormatterFormatOptions = {},
+	): string {
 		let node: CstNode | undefined;
 		if (script instanceof CstNode) {
 			node = script;
